@@ -68,6 +68,6 @@ The basic requeriments to Routers IPv6 conformance and cover by RFC 7084 protoco
 - [x] 3.2.3: FORWARDING LOOPS PART B
 - [x] 3.2.4: UNIQUE LOCAL ADDRESS FORWARDING
 
-### ToDSo
+### ToDo
 - [ ] User Interface
 - [ ] automated pcap capture
