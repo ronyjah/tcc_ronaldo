@@ -250,7 +250,7 @@ class Test324:
                         if pkt[ICMPv6ND_NS].tgt == self.__config.get('lan','lan_local_addr'):
                             self.send_local_na_lan(pkt)
 
-                        if pkt[ICMPv6ND_NS].tgt == self.__config.get(self.ipsrc):
+                        if pkt[ICMPv6ND_NS].tgt == self.ipsrc:
                             self.__config_setup_lan.set_ipv6_src(self.ipsrc)
                             self.__config_setup_lan.set_ether_src(self.__config.get('lan','mac_address'))
                             self.__config_setup_lan.set_ether_dst(pkt[Ether].src)
@@ -399,7 +399,7 @@ class Test324:
                             self.__packet_sniffer_wan.stop() 
                             self.__packet_sniffer_lan.stop()
                             logging.info('TEST 3.2.4: UNIQUE LOCAL ADDRESS FORWARDING....REPROVADO')
-                            logging.info('Teste 3.7.3 - Reprovado. Time out sem mensagem Unreacheable na interface LAN')
+                            logging.info('Time out sem mensagem Unreacheable na interface LAN')
                             return True        
                     else:
                         self.__packet_sniffer_wan.stop()
