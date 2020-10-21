@@ -1,0 +1,33 @@
+NS origem :: for Fe80:703c origem Realtek MAC 
+
+RS origem Fe80:703c Realter MAC to all_routers
+Envia RA origem Fe80:a0a0 MAC from 00:00:01 to all_nodes
+
+envia NS oriem :bd02 tp-link to all_nodes:a0a0
+
+Solicit origem 703c to aLLrouters
+
+envia 3 NS igaus
+
+send ping to fe80:703c feom a0a0
+
+sent advertise dst = linkLocalAddrRealtek
+src = linkLocaladdr
+IAA(IA_NA)= ::abcd (address)
+IA_PD = 1110::/60
+
+recv = request IAA = ::abcd (address)
+sent reply
+
+Problemas
+duvida retirar o endereço a partir do tgt em NS ou src do RS
+NS endereço Local do PC remoto
+NS endereço local do PC local
+NS endereço global do PC remot
+NS endereço global do PC local
+
+Tarefas
+Retornar se receber RS antes do NS
+INformar o tipo de defeito e arrumar em todas as classes
+reenviar NS
+endereço dst do NS não pode ser o end de nodes global
