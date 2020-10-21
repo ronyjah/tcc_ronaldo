@@ -4,6 +4,18 @@ This software implement IPv6 tests on routers using the RFC 7084 requirements.
 
 The Setup and steps for each test is described on Document: [Conformace Scenario](https://www.ipv6ready.org/docs/CE_Router_Conformance_Latest.pdf)
 
+## Installation
+```bash
+git clone https://github.com/ronyjah/tcc_ronaldo
+cd tcc_ronaldo
+sudo su
+source venv/bin/activate
+python3 __main__.py -c .
+
+```
+
+## Usage
+
 ### List tests:
 The basic requeriments to Routers IPv6 conformance and cover by RFC 7084 protocol  tester
 
