@@ -29,7 +29,6 @@ class Test323b:
         self.__local_addr_ceRouter =None
         self.__sendmsgs = SendMsgs(self.__config)
         self.__config_setup1_1 = ConfigSetup1_1(self.__config)
-        #self.__config_setup_lan = ConfigSetup1_1_Lan(self.__config)
         self.__wan_device_tr1 = self.__config.get('wan','device_wan_tr1')
         self.__lan_device = self.__config.get('lan','lan_device')
         self.__wan_mac_tr1 = self.__config.get('wan','wan_mac_tr1')

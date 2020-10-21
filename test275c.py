@@ -86,14 +86,11 @@ class Test275c:
         while not self.__queue_lan.full():
             while self.__queue_lan.empty():
                 
-                logging.info('Thread da LAN time')
+
                 time.sleep(1)
                 
                 if self.__config_setup1_1.get_setup1_1_OK():
-                    logging.info('Thread da WAN DONE')
-#                    t_test = t_test + 1
- #                   if self.__config_setup1_1.get_recvd_dhcp_renew():
-                #pkt = self.__queue_lan.get()
+
                     if t_test < 65:
                         time.sleep(1)
                         t_test = t_test + 1
@@ -141,9 +138,9 @@ class Test275c:
                     return False       
             else:
                 if self.__dhcp_renew_done :
-                    print('DONE CONCLUIDO- VALIDANDO MENSAGEM RA')
+
                     if t_test1 < 60:
-                        print('DONE CONCLUIDO- VALIDANDO MENSAGEM RA TEMPO')
+
                         time.sleep(1)
                         t_test1 = t_test1 + 1
                         #if t_test1 % 10 == 0:
@@ -156,7 +153,7 @@ class Test275c:
                         self.__sendmsgs.send_icmp_rs(self.__config_setup_lan)
                     
                         if pkt.haslayer(ICMPv6ND_RA):
-                            print('DONE CONCLUIDO- VALIDANDO MENSAGEM MENSAGEM RA')    
+   
                             if pkt.haslayer(ICMPv6NDOptPrefixInfo):
                                 if pkt[ICMPv6NDOptPrefixInfo].prefix != self.__config.get('setup1-1_advertise','ia_pd_address2'):
                                     logging.info(' Teste2.7.5c: Reprovado. Não Recebeu o Prefixo atualizado')
@@ -173,22 +170,7 @@ class Test275c:
                                     self.__fail_test = False 
                                     return True       
                             else: print('DONE CONCLUIDO- SEM PREFIX INFO RA')
-                # logging.info('Setup LAN  Concluido')
-                # if self.__config_setup_lan.get_recvd_dhcp_srcladdr():
-                #     logging.info(' Teste 2.7.5c: Recebido Recursive DNS OK.')
-                #     logging.info('Aprovado Teste2.7.5c.')
-                #     self.__packet_sniffer_lan.stop()
-                #     self.__finish_wan = True
-                #     self.__fail_test = False 
-                #     return True       
-              
-                # else:                     
-                #     logging.info(' Teste2.7.5c: Reprovado. Não foi recebido')
-                #     #logging.info(routerlifetime)
-                #     self.__packet_sniffer_lan.stop()
-                #     self.__finish_wan = True 
-                #     self.__fail_test = True
-                #     return False
+
 
 
                 
@@ -243,21 +225,21 @@ class Test275c:
                     print('LAN RESULT')
                     if not sent_reconfigure:
                         time.sleep(25)
-                        print('aqui7')
+
                         self.__config_setup1_1.set_ipv6_src(self.__config.get('wan','link_local_addr'))
-                        print('aqui8')
+
                         self.__config_setup1_1.set_ipv6_dst(self.__config_setup1_1.get_local_addr_ceRouter())
-                        print('aqui10')
+
                         self.__config_setup1_1.set_ether_src(self.__config.get('wan','link_local_mac'))
-                        print('aqui11')
+
                         self.__config_setup1_1.set_ether_dst(self.__config_setup1_1.get_mac_ceRouter())
-                        print('aqui12')
+
                         self.__config_setup1_1.set_dhcp_reconf_type(self.__config.get('t1.6.3','msg_type'))
-                        print('aqui13')
+
                         self.__config_setup1_1.set_udp_sport('547')
                         self.__config_setup1_1.set_udp_dport('546')
                         self.__sendmsgs.send_dhcp_reconfigure(self.__config_setup1_1)
-                        print('aqui14')
+
                         sent_reconfigure = True 
                         
 

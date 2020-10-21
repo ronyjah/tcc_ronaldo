@@ -87,14 +87,10 @@ class Test276:
         while not self.__queue_lan.full():
             while self.__queue_lan.empty():
                 
-                logging.info('Thread da LAN time')
                 time.sleep(1)
                 
                 if self.__config_setup1_1.get_setup1_1_OK():
-                    logging.info('Thread da WAN DONE')
-#                    t_test = t_test + 1
- #                   if self.__config_setup1_1.get_recvd_dhcp_renew():
-                #pkt = self.__queue_lan.get()
+
                     if t_test < 80:
                         time.sleep(1)
                         t_test = t_test + 1

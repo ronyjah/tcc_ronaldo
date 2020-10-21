@@ -153,24 +153,6 @@ class Test275a:
                                 self.__fail_test = False 
                                 return True       
                     
-                # logging.info('Setup LAN  Concluido')
-                # if self.__config_setup_lan.get_recvd_dhcp_srcladdr():
-                #     logging.info(' Teste 2.7.5a: Recebido Recursive DNS OK.')
-                #     logging.info('Aprovado Teste2.7.5a.')
-                #     self.__packet_sniffer_lan.stop()
-                #     self.__finish_wan = True
-                #     self.__fail_test = False 
-                #     return True       
-              
-                # else:                     
-                #     logging.info(' Teste2.7.5a: Reprovado. Não foi recebido')
-                #     #logging.info(routerlifetime)
-                #     self.__packet_sniffer_lan.stop()
-                #     self.__finish_wan = True 
-                #     self.__fail_test = True
-                #     return False
-
-
                 
     def run(self):
         self.__t_lan =  Thread(target=self.run_Lan,name='LAN_Thread')

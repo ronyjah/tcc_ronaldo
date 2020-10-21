@@ -16,10 +16,6 @@ from sendmsgs import SendMsgs
 class ConfigSetup1_1_Lan:
 
     def __init__(self,config,interface):
-        #self.__queue_wan = Queue()
-        #self.__queue_lan = Queue()
-        #logging.info('self.__queue_size_inicio162')
-        #logging.info(self.__queue_wan.qsize())
         self.__config = config
         self.__interface = None
         self.__pkt = None
@@ -94,12 +90,12 @@ class ConfigSetup1_1_Lan:
         self.__enterprise = None
         self.opt_req = None
         self.send_solicit = False
-        #self.__packet_sniffer.daemon=True
+
 
 
     def send_icmpv6_ra(self,pkt):
-        et = Ether(src=self.__wan_mac_tr1)#,\
-                   #dst=pkt[Ether].src)
+        et = Ether(src=self.__wan_mac_tr1)
+
         ip = IPv6(src=self.__link_local_addr,\
                   dst=self.__all_nodes_addr)
         icmp_ra = ICMPv6ND_RA()
@@ -178,8 +174,7 @@ class ConfigSetup1_1_Lan:
    
     def get_lan_device(self):
         return self.__lan_device
-    #recebe o pacote
-    #packetSniffer return pkt
+
     def get_setup_OK(self):
         return self.__setup1_1_OK
 
@@ -410,13 +405,6 @@ class ConfigSetup1_1_Lan:
             return False
 
         if not pkt.haslayer(ICMPv6NDOptPrefixInfo):
-            #self.set_ipv6_src(self.__config.get('lan','lan_local_addr'))
-            #self.set_ether_src(self.__config.get('lan','mac_address'))
-            #self.set_ether_dst(self.__config.get('multicast','all_mac_routers'))
-            #self.set_ipv6_dst(self.__config.get('general','all_routers_address'))
-            #self.set_lla(self.__config.get('lan','mac_address'))
-            #self.__sendmsgssetup1_1.send_icmp_rs(self)
-            #return
             pass
 
         if pkt.haslayer(ICMPv6EchoReply):
@@ -424,7 +412,7 @@ class ConfigSetup1_1_Lan:
                 self.__ping_global = True
                 
         if pkt.haslayer(ICMPv6ND_NS):
-            print('RECEBEU NS NA LAN')
+
             prefix = pkt[ICMPv6ND_NS].tgt
             if prefix[:4] == 'fe80':
                 self.__local_addr_ceRouter = (pkt[ICMPv6ND_NS].tgt)
@@ -432,15 +420,12 @@ class ConfigSetup1_1_Lan:
                 self.__ND_local_OK = True
                 
             if prefix[:4] == (self.__config.get('wan','global_wan_addr'))[:4]:
-                print('PREFIXO GLOBAL nA LAN=====')
-                print('prefix')
+
                 if prefix != self.__config.get('lan','global_wan_addr'):
                     self.__global_addr_ceRouter = (pkt[ICMPv6ND_NS].tgt)
                     self.__global_mac_cerouter = (pkt[Ether].src)
                     self.__ND_global_OK = True
 
-
-            #return
             if pkt[ICMPv6ND_NS].tgt == self.__config.get('lan','global_wan_addr'):
                 self.set_ipv6_src(self.__config.get('lan','global_wan_addr'))
                 self.set_ether_src(self.__config.get('lan','mac_address'))
@@ -450,8 +435,6 @@ class ConfigSetup1_1_Lan:
                 self.set_lla(self.__config.get('lan','mac_address'))
                 self.__sendmsgssetup1_1.send_icmp_na_lan(self)
         
-
-        #if pkt.haslayer(DHCP6_Reply):
 
 
         if pkt.haslayer(ICMPv6ND_RA):
@@ -486,16 +469,5 @@ class ConfigSetup1_1_Lan:
 
             if pkt.haslayer(ICMPv6NDOptSrcLLAddr):
                 self.__linklayer_CeRouter = pkt[ICMPv6NDOptSrcLLAddr].lladdr
-                #self.__recvd_dhcp_srcladdr = True  
-
-
-        # if not self.send_solicit:
-        #     self.set_ipv6_src(self.__config.get('solicitlan','ip'))
-        #     self.set_ether_src(self.__config.get('solicitlan','mac'))
-        #     self.set_ether_dst(self.__config.get('multicast','all_mac_routers'))
-        #     self.set_ipv6_dst(self.__config.get('multicast','all_routers_addr'))
-
-        #     self.__sendmsgssetup1_1.send_dhcp_solicit_ia_na(self)
-        #     return
 
         

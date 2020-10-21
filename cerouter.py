@@ -53,19 +53,10 @@ class CeRouter(Profile):
         self.__link_local_addr = None
         self.mac_input = None
         self.__session = None
-        #self.router = OntRouter(config)
         self.iperf = None
-
-	# def set_previous_mac(self, mac_value):
-	# 	self.__previous_mac = mac_value
-
-	# def get_previous_mac(self):
-	# 	return self.__previous_mac
 
     def configure_interface(self, conf_name, ip):
         lan_device = self.__config.get('jiga', conf_name)
-        #shell('ifconfig ' + lan_device + ' ' + ip + '/24 up')
-        # shell('route add default gw 10.0.0.1 ' + lan_device)
 
     def configure_interfaces(self):
         self.configure_interface('lan_device', '192.168.1.2')
@@ -73,19 +64,6 @@ class CeRouter(Profile):
     def wait_lan_connect(self):
         print("WAIT_LAN_CONNECT LOADED")
         device = self.__config.get('jiga', 'lan_device')
-    #lan_interface = Interface(device)
-    #self.add_step(WaitLanConnect(lan_interface, 10, self.view))
-
-	# def iperf_test(self):
-	# 	chinese_address = self.__config.get('iperf', 'server_chinese')
-	# 	intelbras_address = self.__config.get('iperf', 'server_intelbras')
-	# 	test_time = self.__config.get('iperf', 'time')
-	# 	min_rate = self.__config.get('iperf', 'min_rate')
-	# 	retries = self.__config.get('iperf', 'retries')
-	# 	iperf_test = IperfTest(chinese_address, intelbras_address,\
-	# 						test_time, min_rate, self.view, retry=retries)
-	# 	self.add_step(iperf_test) #FIXME: REFACT: pass config to IPERF test
-	# 	self.iperf = iperf_test
 
     def activate(self):
         logging.info('CeRouter: profile activating')

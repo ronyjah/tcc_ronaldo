@@ -105,20 +105,17 @@ class Test322a:
                     time.sleep(1)
                     t_test = t_test + 1
                     if t_test % 5 ==0:
-                        #print('0')
-                        #print('ENVIO RS - 1 LAN')
+
                         self.__config_setup_lan.set_ipv6_src(self.__config.get('lan','lan_local_addr'))
                         self.__config_setup_lan.set_ether_src(self.__config.get('lan','mac_address'))
                         self.__config_setup_lan.set_ether_dst('33:33:00:01:00:02')
                         self.__config_setup_lan.set_ipv6_dst(self.__config.get('multicast','all_routers_addr'))
                         self.__config_setup_lan.set_xid(self.__config.get('informationlan','xid'))
-                        #self.__config_setup_lan.set_lla(self.__config.get('lan','mac_address'))
+
                         self.__config_setup_lan.set_elapsetime(self.__config.get('informationlan','elapsetime'))
                         self.__config_setup_lan.set_vendor_class(self.__config.get('informationlan','vendorclass'))
                         self.__sendmsgs.send_dhcp_information(self.__config_setup_lan)
                         
-
-                        #self.__config_setup_lan.set_setup_lan_start()
                         self.__config_setup_lan.set_ipv6_src(self.__config.get('lan','lan_local_addr'))
                         self.__config_setup_lan.set_ether_src(self.__config.get('lan','mac_address'))
                         self.__config_setup_lan.set_ether_dst(self.__config.get('multicast','all_mac_routers'))
@@ -126,34 +123,12 @@ class Test322a:
                         self.__config_setup_lan.set_lla(self.__config.get('lan','mac_address'))
                         self.__sendmsgs.send_icmp_rs(self.__config_setup_lan)
 
-                        # if self.__config_setup_lan.get_mac_ceRouter() != None:
-                        #     #print('6')
-                        #     self.__config_setup_lan.set_ipv6_src(self.__config.get('lan','global_wan_addr'))
-                        #     self.__config_setup_lan.set_ether_src(self.__config.get('lan','mac_address'))
-                        #     self.__config_setup_lan.set_ether_dst(self.__config_setup_lan.get_mac_ceRouter())
-                        #     self.__config_setup_lan.set_ipv6_dst(self.__config.get('wan','global_wan_addr'))
-                        #     self.__sendmsgs.send_echo_request_lan(self.__config_setup_lan)
-                            
-                        # self.__config_setup_lan.set_ipv6_src(self.__config.get('lan','lan_local_addr'))
-                        # self.__config_setup_lan.set_ipv6_dst(self.__config.get('multicast','all_nodes_addr'))
-                        # self.__config_setup_lan.set_ether_src(self.__config.get('lan','mac_address'))
-                        # self.__config_setup_lan.set_ether_dst(self.__config.get('multicast','all_mac_nodes'))
-                        # #self.set_tgt(self.get_local_addr_ceRouter())
-                        
-                        # self.__config_setup_lan.set_tgt(self.__config.get('wan','link_local_addr'))
-                        # #self.__sendmsgssetup1_1.send_echo_request(self)
-                        # self.__config_setup_lan.set_lla(self.__config.get('wan','link_local_mac'))
-                        # self.__sendmsgs.send_icmp_ns_lan(self.__config_setup_lan)
-                        #print('1')
 
                     logging.info('Thread da LAN time')
                     time.sleep(1)
                 else:
                     time_over = True
 
-#                    t_test = t_test + 1
- #                   if self.__config_setup1_1.get_recvd_dhcp_renew():
-                #pkt = self.__queue_lan.get()
             else:
 
                 pkt = self.__queue_lan.get()
@@ -182,7 +157,6 @@ class Test322a:
                         self.__config_setup_lan.set_lla(self.__config.get('lan','mac_address'))
                         self.__config_setup_lan.set_mac_ceRouter(pkt[Ether].src)
                         self.__sendmsgs.send_icmp_na_lan(self.__config_setup_lan)
-                    print('AQUI-9')
                     if pkt[ICMPv6ND_NS].tgt == self.__config.get('lan','lan_local_addr'):
 
                         self.__config_setup_lan.set_ipv6_src(self.__config.get('lan','lan_local_addr'))
@@ -202,18 +176,6 @@ class Test322a:
                     if t_test1 % 5 == 0: 
                         self.ping_tn3()
                         
-
-                    # if pkt.haslayer(ICMPv6EchoRequest):
-
-                    #     logging.info('Aprovado Teste 2.7.3b - Recebeu ICMPv6EchoRequest Apos do IP_PD ser fornecido à porta WAN do roteador')
-                    #     self.__packet_sniffer_wan.stop() 
-                    #     return False
-                    #     #print('AQUI-2.0')
-                    #     self.__packet_sniffer_lan.stop()
-                    #     self.__finish_wan = True 
-                    #     self.__fail_test = False
-                    #     return False
-
 
                     if pkt.haslayer(ICMPv6ND_NS):
 
@@ -247,14 +209,9 @@ class Test322a:
         self.__config_setup1_1.set_ipv6_dst(self.__config.get('multicast','all_nodes_addr'))
         self.__sendmsgs.send_tr1_RA(self.__config_setup1_1)
     
-
-
-
-
-
     def ping(self):
         if self.__config_setup1_1.get_mac_ceRouter() != None:
-            #print('6')
+
             self.__config_setup1_1.set_ipv6_src(self.__config.get('wan','global_wan_addr'))
             self.__config_setup1_1.set_ether_src(self.__config.get('wan','wan_mac_tr1'))
             self.__config_setup1_1.set_ether_dst(self.__config_setup1_1.get_mac_ceRouter())
@@ -317,13 +274,11 @@ class Test322a:
                     t_test = t_test + 1
                     if t_test % 10 == 0:
                         self.rourter_advertise()
-                        #self.ping()
-                    
+
                     if start_time_count:
                         if time1 < 40:
                             time1 = time1 + 1
-                                #if time1 % 5 == 0: 
-                                #self.ping()
+
 
 
                 else:

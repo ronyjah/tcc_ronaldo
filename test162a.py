@@ -29,40 +29,10 @@ class Test162a:
     def __init__(self,config):
         self.__queue_wan = Queue()
         self.__queue_lan = Queue()
-        # logging.info('self.__queue_size_inicio162')
-        # logging.info(self.__queue_wan.qsize())
         self.__config = config
         self.__interface = None
         self.__pkt = None
         self.__approved = False
-        # self.__valid = False
-        # self.__result = None
-        # self.__device_lan_tn1 = None
-        # self.__lan_mac_tn1 = None
-        # self.__ceRouter_mac_addr = None
-        # self.__flag_M = None
-        # self.__flag_O = None
-        # self.__flag_chlim = None
-        # self.__flag_L = None
-        # self.__flag_A = None
-        # self.__flag_R = None
-        # self.__validlifetime = None
-        # self.__preferredlifetime = None
-        # self.__interval = None
-        # self.__routerlifetime = None
-        # self.__ipv6_dst =None
-        # self.__ipv6_src = None
-        # self.__ether_src = None
-        # self.__ether_dst = None
-        # self.__xid = None
-        # self.__server_duid = None
-        # self.__client_duid = None
-        # self.__ND_local_OK = False
-        # self.__setup1_1_OK = False
-        # self.__local_ping_OK = False
-        # self.__global_ns_ok = False
-        # self.__dhcp_ok = False
-        # self.__iaid = None
         self.__local_addr_ceRouter =None
         self.__sendmsgs = SendMsgs(self.__config)
         self.__config_setup1_1 = ConfigSetup1_1(self.__config)
@@ -125,14 +95,11 @@ class Test162a:
                         logging.info('Reprovado Teste 1.6.2.a: Recebido Mensagem Echo Reply Sem MAC do CeRouter em MAC destino')
                         return False
         while not self.__queue_wan.empty():
-            # print('RS1')
+
             pkt = self.__queue_wan.get()       
-        # logging.info('Passo4-t162run_sttop-theard success')
-        # logging.info('self.__queue_size_fim')
-        # logging.info(self.__queue_wan.qsize())  
-            #time.sleep(2)
+
         self.__packet_sniffer_wan.stop()
-            #time.sleep(2)
+
         return True
      
         

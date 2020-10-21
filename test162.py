@@ -68,11 +68,6 @@ class Test162a:
         self.__all_nodes_addr = self.__config.get('multicast','all_nodes_addr')
         self.__test_desc = self.__config.get('tests','1.6.2')
         
-        #self.__packet_sniffer.daemon=True
-        
-
-    #recebe o pacote
-    #packetSniffer return pkt
 
 
     def set_result(self, valor):
@@ -264,19 +259,9 @@ class Test162a:
 
     def run(self):
         self.__packet_sniffer_wan = PacketSniffer('test162',self.__queue_wan,self,self.__config,self.__wan_device_tr1)
-        #self.__packet_sniffer.init()
         self.flags_partA()
         self.__CommonSetup1_1.set_flags_common_setup(self)
-        #self.__CommonSetup1_1.send_tr1_RA()
-        #self.__CommonSetup1_1.send_dhcp_advertise()
-        #self.__CommonSetup1_1.send_dhcp_reply()
-        #self.__CommonSetup1_1.send_echo_request()
-        #self.set_ipv6_dst('ff:ff::1')
-        #self.__config.set('setup1-1_advertise','ipv6_addr','ff:ff::1')
-        #self.__CommonSetup1_1.ipv6()
-        #self.__CommonSetup1_1.send_tr1_RA(self)
-        #time.sleep(100000000)
-        
+
 
         self.__packet_sniffer_wan.start()
         logging.info('Task Desc')
@@ -303,36 +288,14 @@ class Test162a:
                         return True
                     else:
                         return False
-            #time.sleep(10000000)
-            # if pkt.haslayer(ICMPv6ND_RA):
-            #     self.set_ipv6_dst(pkt[IPv6].src)
-            #     self.set_ether_dst(pkt[Ether].src)
-                #self.__CommonSetup1_1.ipv6(self)
-                #self.__ceRouter_mac_addr=pkt[Ether].src
-                #self.__CommonSetup1_1.send_tr1_RA(self)
-                # self.__CommonSetup1_1.send_echo_request(self)
-                #self.send_icmpv6_ra(pkt)
-            #time.sleep(1)
-                #break
-                #self.__valid = True
-            #elif pkt.haslayer(ICMPv6ND_RA) and self.__valid == False:
-                #print('theardoffFalse')
-                #self.turn_off_thread()
-             #   return False
-            #else:
-                
-                #print('theardofftrue')
-                #self.turn_off_thread()
-             #   return True
+
         while not self.__queue_wan.empty():
             print('RS1')
             pkt = self.__queue_wan.get()       
         logging.info('Passo4-t162run_sttop-theard success')
         logging.info('self.__queue_size_fim')
         logging.info(self.__queue_wan.qsize())  
-            #time.sleep(2)
         self.__packet_sniffer_wan.stop()
-            #time.sleep(2)
         return True
      
         

@@ -2,7 +2,7 @@
 
 import logging
 from cerouter import CeRouter
-#exemplo testes em nodes, Telefones VOIP, etc
+
 
 format = "%(asctime)s: %(message)s"
 logging.basicConfig(format=format, level=logging.DEBUG,
@@ -12,24 +12,11 @@ class Engine:
     def __init__(self):
         self.__profiles_list = []
         self.__active_profile = None
-        # self.__jiga_id = jiga_id
-        # self.__connector = connector
+
 
     def load_profiles(self, config):
         self.add_profile(CeRouter(config))
-        #self.add_profile(Hosts())
-        #self.add_profile(ATA_VOIP())
 
-
-
-    # def notify_server_connected(self, jiga_id):
-    # 	if self.__jiga_id != jiga_id:
-    # 		logging.error(\
-    # 			'Engine - received notification with incorrect jiga id.')
-    # 		return False
-
-    # 	self.__connector.set_connected()
-    # 	return True
 
     def add_profile(self, profile):
         self.__profiles_list.append(profile)
@@ -39,11 +26,9 @@ class Engine:
 
     def set_profile(self, profile_name):
 
-    #		logging.debug("Engine - Setting profile to " + profile_name)
 
         for profile in self.__profiles_list:
 
-            #print(profile)
             if profile.get_name() == profile_name:
 
                 self.__active_profile = profile
@@ -72,11 +57,7 @@ class Engine:
 
         logging.info('Application started with profile: ' + profile_name)
 
-        #while True:
-            #try:
         self.__active_profile.execute(profile_name)
-        #    except BaseException as error:
-        #        logging.error(error)
 
     def get_profile_names(self):
         profiles = []

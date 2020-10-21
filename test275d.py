@@ -175,22 +175,6 @@ class Test275d:
                                     self.__fail_test = False 
                                     return True       
                             else: print('DONE CONCLUIDO- SEM PREFIX INFO RA')
-                # logging.info('Setup LAN  Concluido')
-                # if self.__config_setup_lan.get_recvd_dhcp_srcladdr():
-                #     logging.info(' Teste 2.7.5d: Recebido Recursive DNS OK.')
-                #     logging.info('Aprovado Teste2.7.5d.')
-                #     self.__packet_sniffer_lan.stop()
-                #     self.__finish_wan = True
-                #     self.__fail_test = False 
-                #     return True       
-              
-                # else:                     
-                #     logging.info(' Teste2.7.5d: Reprovado. Não foi recebido')
-                #     #logging.info(routerlifetime)
-                #     self.__packet_sniffer_lan.stop()
-                #     self.__finish_wan = True 
-                #     self.__fail_test = True
-                #     return False
 
 
                 
@@ -241,31 +225,21 @@ class Test275d:
 
             else:
                 if not self.__finish_wan: 
-                    print('WAN - Concluido')
-                    print('LAN RESULT')
                     if not sent_reconfigure:
                         time.sleep(25)
-                        print('aqui7')
                         self.__config_setup1_1.set_ipv6_src(self.__config.get('wan','link_local_addr'))
-                        print('aqui8')
                         self.__config_setup1_1.set_ipv6_dst(self.__config_setup1_1.get_local_addr_ceRouter())
-                        print('aqui10')
                         self.__config_setup1_1.set_ether_src(self.__config.get('wan','link_local_mac'))
-                        print('aqui11')
                         self.__config_setup1_1.set_ether_dst(self.__config_setup1_1.get_mac_ceRouter())
-                        print('aqui12')
                         self.__config_setup1_1.set_dhcp_reconf_type(self.__config.get('t1.6.3','msg_type'))
-                        print('aqui13')
                         self.__config_setup1_1.set_udp_sport('547')
                         self.__config_setup1_1.set_udp_dport('546')
                         self.__sendmsgs.send_dhcp_reconfigure(self.__config_setup1_1)
-                        print('aqui14')
                         sent_reconfigure = True 
-                        
+                       
 
                     if pkt.haslayer(DHCP6_Renew):
                         if not self.__dhcp_renew_done:
-    #                        if self.__active_renew_dhcp:
                             self.__config_setup1_1.set_mac_ceRouter(pkt[Ether].src)
                             self.__config_setup1_1.set_local_addr_ceRouter(pkt[IPv6].src)
                             self.__config_setup1_1.set_xid(pkt[DHCP6_Renew].trid)
@@ -278,7 +252,6 @@ class Test275d:
                             self.__config_setup1_1.set_dhcp_plen('60')
                             self.__config_setup1_1.set_prefix_addr(self.__config.get('setup1-1_advertise','ia_pd_address'))
                             self.__sendmsgs.send_dhcp_reply_v3(self.__config_setup1_1)
-                            #self.__dhcp_ok = True
                             self.__dhcp_renew_done = True
                 else:
                     self.__packet_sniffer_wan.stop()

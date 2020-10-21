@@ -74,7 +74,6 @@ class Test277b:
 
         
     def run_Lan(self):
-        #self.__config_setup_lan_.flags_partA()
         logging.info('Thread da LAN inicio')
         t_test = 0
         t_test1= 0
@@ -167,138 +166,7 @@ class Test277b:
                     self.__finish_wan = True 
                     self.__fail_test = True
                     return False
-                        # self.__l_CeRouter = pkt[ICMPv6NDOptPrefixInfo].L
-                        # self.__A_CeRouter = pkt[ICMPv6NDOptPrefixInfo].A
-                        # self.__R_CeRouter = pkt[ICMPv6NDOptPrefixInfo].R
-                        # self.__validlifetime_CeRouter = pkt[ICMPv6NDOptPrefixInfo].validlifetime
-                        # self.__preferredlifetime_CeRouter = pkt[ICMPv6NDOptPrefixInfo].preferredlifetime
-                        # self.__prefixlen_CeRouter = pkt[ICMPv6NDOptPrefixInfo].prefixlen
-                        # self.send_solicit = True
-                        # self.__setup1_1_OK = True
-                        #return
-                    # print('CHegou RA na LAN')
-                    # if pkt.haslayer(ICMPv6NDOptRouteInfo):
-                    #     self.__r_prefixaddr_CeRouter = pkt[ICMPv6NDOptRouteInfo].prefix
-                    #     self.__r_plen_CeRouter = pkt[ICMPv6NDOptRouteInfo].plen
-                    #     self.__r_prf_CeRouter = pkt[ICMPv6NDOptRouteInfo].prf
-                    #     self.__r_rtlifetime_CeRouter = pkt[ICMPv6NDOptRouteInfo].rtlifetime
 
-                    # if pkt.haslayer(ICMPv6NDOptRDNSS):
-                    #     self.__rdnss_dns_CeRouter = pkt[ICMPv6NDOptRDNSS].dns
-                    #     self.__rdnss_lifetime_CeRouter = pkt[ICMPv6NDOptRDNSS].lifetime
-                    #     self.__recvd_dhcp_rdnss = True
-        
-                    # if pkt.haslayer(ICMPv6NDOptDNSSL):
-                    #     self.__domainname = pkt[ICMPv6NDOptDNSSL].searchlist
-                    #     self.__domainname_lifetime_CeRouter = pkt[ICMPv6NDOptDNSSL].lifetime
-                    #     self.__recvd_dhcp_srcladdr = True  
-
-                    # if pkt.haslayer(ICMPv6NDOptSrcLLAddr):
-                    #     self.__linklayer_CeRouter = pkt[ICMPv6NDOptSrcLLAddr].lladdr
-                        #self.__recvd_dhcp_srcladdr = True  
-
-
-
-
-
-
-
-                # print('LOOP FINAL  ENVIO REQUEST')
-                # mac_global = self.__config_setup_lan.get_global_mac_ceRouter()
-                # ip_global = self.__config_setup_lan.get_global_addr_ceRouter()
-                # self.__config_setup_lan.set_ipv6_src(self.__config.get('t2.7.7b','source_to_ping_tn1'))
-                # self.__config_setup_lan.set_ether_src(self.__config.get('lan','mac_address'))
-                # self.__config_setup_lan.set_ether_dst(mac_global)
-                # self.__config_setup_lan.set_ipv6_dst(self.__config.get('wan','global_wan_addr'))
-                # self.__sendmsgs.send_echo_request_lan(self.__config_setup_lan)
-
-
-                # print('LOOP FINAL')
-                # if pkt[Ether].src == self.__config.get('lan','mac_address'): 
-                #     continue
-                # print('LOOP ECHO REPLY')
-                # if pkt.haslayer(ICMPv6EchoReply):
-                #     self.__packet_sniffer_lan.stop()
-                #     self.__finish_wan = True 
-                #     self.__fail_test = True
-                #     return False
-                # print('LOOP FINAL  NS')
-                # if pkt.haslayer(ICMPv6ND_NS):
-                #     if pkt[ICMPv6ND_NS].tgt == self.__config.get('t2.7.7b','source_to_ping_tn1'):
-                #         print('LOOP FINAL  CEROUTER INVIO NS PARA O PING TN1')
-                #         print(pkt[ICMPv6ND_NS].tgt)
-                #         if not send_na_lan:
-                #             self.__config_setup_lan.set_ipv6_src(self.__config.get('lan','global_wan_addr'))
-                #             self.__config_setup_lan.set_ether_src(self.__config.get('lan','mac_address'))
-                #             self.__config_setup_lan.set_ether_dst(self.__config_setup_lan.get_global_mac_ceRouter())
-                #             self.__config_setup_lan.set_ipv6_dst(self.__config_setup_lan.get_global_addr_ceRouter())
-                #             self.__config_setup_lan.set_tgt(self.__config.get('t2.7.7b','source_to_ping_tn1'))
-                #             self.__config_setup_lan.set_lla(self.__config.get('lan','mac_address'))
-                #             send_na_lan = True
-                #             self.__sendmsgs.send_icmp_na_lan(self.__config_setup_lan)
-                # print('LOOP FINAL  INALCANCAVEL')
-                # if pkt.haslayer(ICMPv6DestUnreach):
-                #     print('LOOP FINAL  INALCANCAVEL DENTRO')
-                #     logging.info(' Teste 2.7.7b: destino TN1 inalcançável.')
-                #     logging.info('Aprovado Teste2.7.7b.')
-                #     self.__packet_sniffer_lan.stop()
-                #     self.__finish_wan = True
-                #     self.__fail_test = False 
-                #     return True  
-
-
-                
-                # if self.__dhcp_renew_done :
-                #     print('DONE CONCLUIDO- VALIDANDO MENSAGEM RA')
-                #     if t_test1 < 60:
-                #         print('DONE CONCLUIDO- VALIDANDO MENSAGEM RA TEMPO')
-                #         time.sleep(1)
-                #         t_test1 = t_test1 + 1
-                #         #if t_test1 % 10 == 0:
-                #             #self.__config_setup_lan.set_setup_lan_start()
-                #         self.__config_setup_lan.set_ipv6_src(self.__config.get('lan','lan_local_addr'))
-                #         self.__config_setup_lan.set_ether_src(self.__config.get('lan','mac_address'))
-                #         self.__config_setup_lan.set_ether_dst(self.__config.get('multicast','all_mac_routers'))
-                #         self.__config_setup_lan.set_ipv6_dst(self.__config.get('general','all_routers_address'))
-                #         self.__config_setup_lan.set_lla(self.__config.get('lan','mac_address'))
-                #         self.__sendmsgs.send_icmp_rs(self.__config_setup_lan)
-                    
-                #         if pkt.haslayer(ICMPv6ND_RA):
-                #             print('DONE CONCLUIDO- VALIDANDO MENSAGEM MENSAGEM RA')    
-                #             if pkt.haslayer(ICMPv6NDOptRouteInfo):
-                #                 if pkt[ICMPv6NDOptRouteInfo].plen != 60:
-                #                     logging.info(' Teste2.7.7b: Reprovado. Tamanho do prefixo diferente do anunciado no DHCP Reconfigure')
-                #                     logging.info(pkt[ICMPv6NDOptPrefixInfo].prefixlen)
-                #                     logging.info(pkt[ICMPv6NDOptRouteInfo].plen)
-
-                #                     self.__packet_sniffer_lan.stop()
-                #                     self.__finish_wan = True 
-                #                     self.__fail_test = True
-                #                     return False                                
-                #                 else: #self.__validlifetime_CeRouter == pkt[ICMPv6NDOptPrefixInfo].validlifetime
-                #                     logging.info(' Teste 2.7.7b:Tamanho do prefixo igual ao anunciado na mensagem DHCP Reconfigure.')
-                #                     logging.info('Aprovado Teste2.7.7b.')
-                #                     self.__packet_sniffer_lan.stop()
-                #                     self.__finish_wan = True
-                #                     self.__fail_test = False 
-                #                     return True       
-                #             else: print('DONE CONCLUIDO- SEM PREFIX INFO RA')
-                # logging.info('Setup LAN  Concluido')
-                # if self.__config_setup_lan.get_recvd_dhcp_srcladdr():
-                #     logging.info(' Teste 2.7.7b: Recebido Recursive DNS OK.')
-                #     logging.info('Aprovado Teste2.7.7b.')
-                #     self.__packet_sniffer_lan.stop()
-                #     self.__finish_wan = True
-                #     self.__fail_test = False 
-                #     return True       
-              
-                # else:                     
-                #     logging.info(' Teste2.7.7b: Reprovado. Não foi recebido')
-                #     #logging.info(routerlifetime)
-                #     self.__packet_sniffer_lan.stop()
-                #     self.__finish_wan = True 
-                #     self.__fail_test = True
-                #     return False
 
 
                 

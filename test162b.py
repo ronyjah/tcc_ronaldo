@@ -13,12 +13,6 @@ from packetsniffer import PacketSniffer
 from commontestsetup1_1 import CommonTestSetup1_1
 from sendmsgs import SendMsgs
 from configsetup1_1 import ConfigSetup1_1
-# - Seleciona a interface
-# - recebe thread de captura das mensagens já iniciada na main
-# - inicia a captura
-# - recebe o pacote e armazena numa lista
-# - analisa o pacote recebido e armazenado na lista
-# - 
 
 format = "%(asctime)s: %(message)s"
 logging.basicConfig(format=format, level=logging.DEBUG,

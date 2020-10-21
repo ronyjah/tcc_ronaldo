@@ -67,8 +67,6 @@ class Test271b:
         self.__config_setup_lan.set_xid(self.__config.get('solicitlan','xid'))
         self.__config_setup_lan.set_fdqn(self.__config.get('solicitlan','clientfqdn'))
         self.__config_setup_lan.set_vendor_class(self.__config.get('solicitlan','vendorclass'))
-        #self.__config_setup_lan.set_t1(self.__config.get('solicitlan','elapsetime'))
-        #self.__config_setup_lan.set_t2(self.__config.get('solicitlan','elapsetime'))
         self.__config_setup_lan.set_enterprise(self.__config.get('solicitlan','enterpriseid'))
         self.__config_setup_lan.set_client_duid(self.__config.get('solicitlan','duid'))
         self.__config_setup_lan.set_iaid(self.__config.get('solicitlan','iaid'))
@@ -180,49 +178,10 @@ class Test271b:
                     return False
 
             else: 
-                print('WAN - Concluido')
-                print('LAN RESULT')
-                print(test_lan)
                 if not finish_wan:
                     self.__packet_sniffer_wan.stop()
                     finish_wan = True 
-                #continue
-
-                # if pkt.haslayer(DHCP6_Renew):
-                #     logging.info(pkt.show())
-                #     logging.info('Reprovado Teste 2.7.1.a - Respondeu ao DHCP6 reconfigure de chave falsa')
-
-                #     self.__packet_sniffer_wan.stop()
-                #     return False
-                # elif time_over :
-                #     if not sent_reconfigure:
-                #         self.__packet_sniffer_wan.stop()
-                #         logging.info('Falha: Teste 2.7.1.a. Tempo finalizado mas Não Enviou DHCP Reconfigure')
-
-                #         return False
-                #     else:
-                #         self.__packet_sniffer_wan.stop() 
-                #         logging.info('Aprovado: Teste 2.7.1.a. Tempo finalizado e não recebeu DHCP Renew em DHCP Reconf adulterado')
-
-                #         return True
-                # if not sent_reconfigure:
-
-                #     self.__config_setup1_1.set_ipv6_src(self.__config.get('wan','link_local_addr'))
-                #     self.__config_setup1_1.set_ipv6_dst(self.__config.get('multicast','dhcp_relay_agents_and_servers_addr'))
-                #     self.__config_setup1_1.set_ether_src(self.__config.get('wan','link_local_mac'))
-                #     self.__config_setup1_1.set_ether_dst(self.__config_setup1_1.get_ether_dst())
-                #     self.__config_setup1_1.set_dhcp_reconf_type(self.__config.get('t2.7.1','msg_type'))
-                #     self.__sendmsgs.send_dhcp_reconfigure_wrong(self.__config_setup1_1)
-                #     sent_reconfigure = True
-            
-
-                # if pkt.haslayer(DHCP6_Solicit):
-                #     self.__packet_sniffer_wan.stop()
-                #     while not self.__queue_wan.empty():
-                #         pkt = self.__queue_wan.get() 
-                #     return True
-        # while not pkt.haslayer(IPv6):
-        #     pkt = self.__queue_wan.get()      
+      
         self.__packet_sniffer_wan.stop()
         return False
      

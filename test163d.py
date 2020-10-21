@@ -107,13 +107,7 @@ class Test163d:
                     sent_reconfigure = True
             
 
-                # if pkt.haslayer(DHCP6_Solicit):
-                #     self.__packet_sniffer_wan.stop()
-                #     while not self.__queue_wan.empty():
-                #         pkt = self.__queue_wan.get() 
-                #     return True
-        # while not pkt.haslayer(IPv6):
-        #     pkt = self.__queue_wan.get()      
+     
         self.__packet_sniffer_wan.stop()
         return False
      

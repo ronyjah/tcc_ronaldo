@@ -68,8 +68,7 @@ class CommonTestSetup1_1:
         self.__preferredlifetime = test_flags.get_preferredlifetime()
         self.__routerlifetime = test_flags.get_routerlifetime()
         self.__intervalo = test_flags.get_interval()
-#sendp(Ether()/IPv6()/UDP()/DHCP6_Advertise()/DHCP6OptClientId()/DHCP6OptServerId()/DHCP6OptIA_NA()/DHCP6OptIA_PD()/DHCP6OptDNSServers()/DHCP6OptDNSDomains(),iface='lo')
-# TR1 transmits a Router Advertisement to the all-nodes multicast address with the M and O Flag
+
     def ether(self,test=None):
         print('etheraddres')
         print (test.get_ether_dst())
@@ -81,9 +80,6 @@ class CommonTestSetup1_1:
         print (test.get_ipv6_dst())
         return IPv6(src=test.get_ipv6_src() if test else self.__link_local_addr,\
                     dst= test.get_ipv6_dst() if test else self.__all_nodes_addr)
-                    #dst = self.__config.get('setup1-1_advertise','ipv6_addr'))
-                    #
-                      
     
     def icmpv6_ra(self,test=None):
         return ICMPv6ND_RA(M=self.__flag_M,\

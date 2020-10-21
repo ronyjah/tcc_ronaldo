@@ -81,7 +81,7 @@ class Test323a:
 
     def ping_tn3(self):
         if self.__config_setup1_1.get_mac_ceRouter() != None:
-            #print('6')
+
             self.__config_setup_lan.set_ipv6_src(self.__config.get('lan','global_wan_addr'))
             self.__config_setup_lan.set_ether_src(self.__config.get('lan','mac'))
             self.__config_setup_lan.set_ether_dst(self.__config_setup_lan.get_mac_ceRouter())
@@ -89,8 +89,7 @@ class Test323a:
             self.__sendmsgs.send_echo_request_lan(self.__config_setup_lan)
         
     def run_Lan(self):
-        #self.__config_setup_lan_.flags_partA()
-        logging.info('Thread da LAN inicio')
+
         t_test = 0
         t_test1= 0
         time_p = 0
@@ -108,8 +107,7 @@ class Test323a:
                     time.sleep(1)
                     t_test = t_test + 1
                     if t_test % 5 ==0:
-                        #print('0')
-                        #print('ENVIO RS - 1 LAN')
+
                         self.__config_setup_lan.set_ipv6_src(self.__config.get('lan','lan_local_addr'))
                         self.__config_setup_lan.set_ether_src(self.__config.get('lan','mac_address'))
                         self.__config_setup_lan.set_ether_dst('33:33:00:01:00:02')
@@ -129,34 +127,13 @@ class Test323a:
                         self.__config_setup_lan.set_lla(self.__config.get('lan','mac_address'))
                         self.__sendmsgs.send_icmp_rs(self.__config_setup_lan)
 
-                        # if self.__config_setup_lan.get_mac_ceRouter() != None:
-                        #     #print('6')
-                        #     self.__config_setup_lan.set_ipv6_src(self.__config.get('lan','global_wan_addr'))
-                        #     self.__config_setup_lan.set_ether_src(self.__config.get('lan','mac_address'))
-                        #     self.__config_setup_lan.set_ether_dst(self.__config_setup_lan.get_mac_ceRouter())
-                        #     self.__config_setup_lan.set_ipv6_dst(self.__config.get('wan','global_wan_addr'))
-                        #     self.__sendmsgs.send_echo_request_lan(self.__config_setup_lan)
-                            
-                        # self.__config_setup_lan.set_ipv6_src(self.__config.get('lan','lan_local_addr'))
-                        # self.__config_setup_lan.set_ipv6_dst(self.__config.get('multicast','all_nodes_addr'))
-                        # self.__config_setup_lan.set_ether_src(self.__config.get('lan','mac_address'))
-                        # self.__config_setup_lan.set_ether_dst(self.__config.get('multicast','all_mac_nodes'))
-                        # #self.set_tgt(self.get_local_addr_ceRouter())
-                        
-                        # self.__config_setup_lan.set_tgt(self.__config.get('wan','link_local_addr'))
-                        # #self.__sendmsgssetup1_1.send_echo_request(self)
-                        # self.__config_setup_lan.set_lla(self.__config.get('wan','link_local_mac'))
-                        # self.__sendmsgs.send_icmp_ns_lan(self.__config_setup_lan)
-                        #print('1')
+
 
                     logging.info('Thread da LAN time')
                     time.sleep(1)
                 else:
                     time_over = True
 
-#                    t_test = t_test + 1
- #                   if self.__config_setup1_1.get_recvd_dhcp_renew():
-                #pkt = self.__queue_lan.get()
             else:
 
                 pkt = self.__queue_lan.get()
@@ -200,12 +177,6 @@ class Test323a:
             if self.__config_setup1_1.get_setup1_1_OK():
                 if pkt[Ether].src == self.__config.get('lan','mac_address'):
                     continue
-                # if t_test1 < 30:
-                #     t_test1 = t_test1 + 1
-                #     if t_test1 % 5 == 0: 
-                #         self.ping_tn3()
-                #         print('imprimindo relogio ping')
-                #         print(t_test1)       
 
                 if pkt.haslayer(ICMPv6EchoRequest):
 
@@ -252,11 +223,6 @@ class Test323a:
         self.__config_setup1_1.set_ipv6_src(self.__config.get('wan','ra_address'))
         self.__config_setup1_1.set_ipv6_dst(self.__config.get('multicast','all_nodes_addr'))
         self.__sendmsgs.send_tr1_RA2(self.__config_setup1_1)
-    
-
-
-
-
 
     def ping(self):
         if self.__config_setup1_1.get_mac_ceRouter() != None:

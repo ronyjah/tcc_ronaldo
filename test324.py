@@ -271,9 +271,9 @@ class Test324:
 
     def run(self):
         logging.info(self.__test_desc)
-        logging.info('==================================================================================')
+        logging.info('==================================================================================================')
         logging.info('Ative a ULA com prefixo: ' +  self.__config.get('t3.2.4','prefix_ula') + ' . E reinicie o Roteador') 
-        logging.info('==================================================================================')
+        logging.info('==================================================================================================')
         time.sleep(10)
         self.__t_lan =  Thread(target=self.run_Lan,name='LAN_Thread')
         self.__t_lan.start()
@@ -376,7 +376,7 @@ class Test324:
                             
                             if pkt.haslayer(ICMPv6EchoRequest):
                                 logging.info('TEST 3.2.4: UNIQUE LOCAL ADDRESS FORWARDING....REPROVADO')
-                                logging.info('Recebido Echo Request na WAN de um IP proveniente da ULA atribuido na LAN')
+                                logging.info('Indevido recebimento de Echo Request na WAN de um IP proveniente pela ULA do roteador e atribuido na LAN')
                                 self.__packet_sniffer_wan.stop() 
                                 self.__packet_sniffer_lan.stop()
                                 self.__finish_wan = True 

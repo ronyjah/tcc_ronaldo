@@ -77,8 +77,7 @@ class Test321b:
 
         
     def run_Lan(self):
-        #self.__config_setup_lan_.flags_partA()
-        logging.info('Thread da LAN inicio')
+
         t_test = 0
         t_test1= 0
         time_p = 0
@@ -91,18 +90,9 @@ class Test321b:
         while not self.__queue_lan.full():
             if self.__queue_lan.empty():
                 if t_test < 30:
- 
-
-
-
-
-
- 
                     time.sleep(1)
                     t_test = t_test + 1
                     if t_test % 5 ==0:
-                        #print('0')
-                        #print('ENVIO RS - 1 LAN')
                         self.__config_setup_lan.set_ipv6_src(self.__config.get('lan','lan_local_addr'))
                         self.__config_setup_lan.set_ether_src(self.__config.get('lan','mac_address'))
                         self.__config_setup_lan.set_ether_dst('33:33:00:01:00:02')
@@ -122,24 +112,7 @@ class Test321b:
                         self.__config_setup_lan.set_lla(self.__config.get('lan','mac_address'))
                         self.__sendmsgs.send_icmp_rs(self.__config_setup_lan)
 
-                        # if self.__config_setup_lan.get_mac_ceRouter() != None:
-                        #     #print('6')
-                        #     self.__config_setup_lan.set_ipv6_src(self.__config.get('lan','global_wan_addr'))
-                        #     self.__config_setup_lan.set_ether_src(self.__config.get('lan','mac_address'))
-                        #     self.__config_setup_lan.set_ether_dst(self.__config_setup_lan.get_mac_ceRouter())
-                        #     self.__config_setup_lan.set_ipv6_dst(self.__config.get('wan','global_wan_addr'))
-                        #     self.__sendmsgs.send_echo_request_lan(self.__config_setup_lan)
-                            
-                        # self.__config_setup_lan.set_ipv6_src(self.__config.get('lan','lan_local_addr'))
-                        # self.__config_setup_lan.set_ipv6_dst(self.__config.get('multicast','all_nodes_addr'))
-                        # self.__config_setup_lan.set_ether_src(self.__config.get('lan','mac_address'))
-                        # self.__config_setup_lan.set_ether_dst(self.__config.get('multicast','all_mac_nodes'))
-                        # #self.set_tgt(self.get_local_addr_ceRouter())
-                        
-                        # self.__config_setup_lan.set_tgt(self.__config.get('wan','link_local_addr'))
-                        # #self.__sendmsgssetup1_1.send_echo_request(self)
-                        # self.__config_setup_lan.set_lla(self.__config.get('wan','link_local_mac'))
-                        # self.__sendmsgs.send_icmp_ns_lan(self.__config_setup_lan)
+
                         #print('1')
 
                     logging.info('Thread da LAN time')
@@ -147,35 +120,32 @@ class Test321b:
                 else:
                     time_over = True
 
-#                    t_test = t_test + 1
- #                   if self.__config_setup1_1.get_recvd_dhcp_renew():
-                #pkt = self.__queue_lan.get()
             else:
-                print('AQUI-1')
+
                 pkt = self.__queue_lan.get()
-                print('AQUI-2')
+
                 if not time_over:
                     if pkt.haslayer(ICMPv6EchoRequest):
-                        print('AQUI-2.0')
+
                         self.__packet_sniffer_lan.stop()
                         self.__finish_wan = True 
                         self.__fail_test = True
                         return False
-                    print('AQUI-3')
+
                     if pkt.haslayer(ICMPv6ND_RA):
                         self.__config_setup_lan.set_mac_ceRouter(pkt[Ether].src)
-                    print('AQUI-4')
+
                     if pkt.haslayer(ICMPv6MLReport2):
                         self.__config_setup_lan.set_mac_ceRouter(pkt[Ether].src)
-                    print('AQUI-5')
+
                     if pkt.haslayer(DHCP6_Reply):
                         self.__config_setup_lan.set_mac_ceRouter(pkt[Ether].src)
 
                     if pkt[Ether].src == self.__config.get('lan','mac_address'):
                         continue
-                    print('AQUI-6')
+ 
                     if pkt.haslayer(ICMPv6ND_NS):
-                        print('AQUI-7')
+
 
                         if pkt.haslayer(ICMPv6EchoRequest):
 
@@ -188,8 +158,6 @@ class Test321b:
                             self.__fail_test = False
                             return False
 
-
-                        print('AQUI-8')
                         if pkt[ICMPv6ND_NS].tgt == self.__config.get('lan','global_wan_addr'):
                             self.__config_setup_lan.set_ipv6_src(self.__config.get('lan','global_wan_addr'))
                             self.__config_setup_lan.set_ether_src(self.__config.get('lan','mac_address'))
@@ -199,7 +167,7 @@ class Test321b:
                             self.__config_setup_lan.set_lla(self.__config.get('lan','mac_address'))
                             self.__config_setup_lan.set_mac_ceRouter(pkt[Ether].src)
                             self.__sendmsgs.send_icmp_na_lan(self.__config_setup_lan)
-                        print('AQUI-9')
+
                         if pkt[ICMPv6ND_NS].tgt == self.__config.get('lan','lan_local_addr'):
 
                             self.__config_setup_lan.set_ipv6_src(self.__config.get('lan','lan_local_addr'))
@@ -226,10 +194,7 @@ class Test321b:
                         self.__fail_test = False
                         return False
 
-
-
                     if pkt.haslayer(ICMPv6ND_NS):
-
                         if pkt[ICMPv6ND_NS].tgt == self.__config.get('lan','global_wan_addr'):
                             self.__config_setup_lan.set_ipv6_src(self.__config.get('lan','global_wan_addr'))
                             self.__config_setup_lan.set_ether_src(self.__config.get('lan','mac_address'))
@@ -327,39 +292,30 @@ class Test321b:
                 if not self.__config_setup1_1.get_ND_local_OK():
 
                     if pkt[Ether].src == self.__config.get('wan','link_local_mac'):
-                        print('ND_LOCAL,continue')
                         continue
 
                     if pkt[Ether].src == self.__config.get('wan','ra_mac'):
-                        print('ND_LOCAL-A,continue')                        
                         continue
 
-
                     if pkt.haslayer(ICMPv6ND_RS):
-                  
                         if pkt[Ether].src == self.__config.get('wan','link_local_mac'):
-                            print('RS,continue')         
                             continue
 
                         if pkt[Ether].src == self.__config.get('wan','ra_mac'):
-                            print('RS-A,continue')                                     
                             continue
 
                         self.__config_setup1_1.set_local_addr_ceRouter(pkt[IPv6].src)
                         self.__config_setup1_1.set_mac_ceRouter(pkt[Ether].src)    
-                        #self.__config_setup1_1.set_ND_local_OK()
+
 
                     if pkt.haslayer(DHCP6_Solicit):
                         if pkt[Ether].src == self.__config.get('wan','link_local_mac'):
-                            print('solicit,continue')
                             continue
 
                         if pkt[Ether].src == self.__config.get('wan','ra_mac'):
-                            print('solicitA,continue')
                             continue
                         self.__config_setup1_1.set_local_addr_ceRouter(pkt[IPv6].src)
                         self.__config_setup1_1.set_mac_ceRouter(pkt[Ether].src)
-                        #self.__config_setup1_1.set_ND_local_OK()  
 
                 if pkt.haslayer(ICMPv6ND_NS):
 
@@ -370,24 +326,15 @@ class Test321b:
                         self.neighbor_advertise_local(pkt)
 
                 if time_over:
-                    print('time-over')
-                    #pkt = self.__queue_wan.get()
                     if not self.__config_setup1_1.get_setup1_1_OK():
-                        print('test1')
                         if not self.__config_setup1_1.get_disapproved():
-                            print('test2')
                             self.__config_setup1_1.run_setup1_1(pkt)
-                            print('test3')
                             if pkt.haslayer(ICMPv6ND_RS):
-
                                 if pkt[Ether].src == self.__config.get('wan','link_local_mac'):
-                                    print('RS-2,continue')         
                                     continue
                                 if pkt[Ether].src == self.__config.get('wan','ra_mac'):
-                                    print('RS-2A,continue')
                                     continue
-                                print('test4')
-                                #self.__config_setup1_1.set_ND_local_OK()
+
                                 self.__config_setup1_1.set_local_addr_ceRouter(pkt[IPv6].src)
                                 self.__config_setup1_1.set_mac_ceRouter(pkt[Ether].src)                                 
                                 self.__config_setup1_1.set_ether_src(self.__config.get('wan','ra_mac'))
@@ -407,15 +354,11 @@ class Test321b:
                                 time1 = time1 + 1
                                 if time1 % 5 == 0: 
                                     self.ping()
-                                    
 
                             if pkt.haslayer(ICMPv6ND_NS):
                                 if pkt[ICMPv6ND_NS].tgt == self.__config.get('wan','global_wan_addr'):
-                                    print('glboal')
                                     self.neighbor_advertise_global(pkt)
-
                                 if pkt[ICMPv6ND_NS].tgt == self.__config.get('wan','ra_address'):
-                                    print('local')
                                     self.__config_setup1_1.set_ipv6_src(self.__config.get('wan','ra_address'))
                                     self.__config_setup1_1.set_ether_src(self.__config.get('wan','ra_mac'))
                                     self.__config_setup1_1.set_ether_dst(pkt[Ether].src)
@@ -424,15 +367,7 @@ class Test321b:
                                     self.__config_setup1_1.set_lla(self.__config.get('wan','ra_mac'))
                                     self.__config_setup1_1.set_mac_ceRouter(pkt[Ether].src)
                                     self.__sendmsgs.send_icmp_na(self.__config_setup1_1)
-                                    ##print('LOOP NS')
-                                    # ##print(pkt[ICMPv6ND_NS].tgt)
-                                    # self.__config_setup1_1.set_ipv6_src(self.__config.get('wan','global_wan_addr'))
-                                    # self.__config_setup1_1.set_ether_src(self.__config.get('wan','wan_mac_tr1'))
-                                    # self.__config_setup1_1.set_ether_dst(pkt[Ether].src)
-                                    # self.__config_setup1_1.set_ipv6_dst(pkt[IPv6].src)
-                                    # self.__config_setup1_1.set_tgt(self.__config.get('wan','global_wan_addr'))
-                                    # self.__config_setup1_1.set_lla(self.__config.get('wan','wan_mac_tr1'))
-                                    # self.__sendmsgs.send_icmp_na(self.__config_setup1_1)
+
                         else:
                             self.__packet_sniffer_wan.stop()
                             if self.__fail_test:

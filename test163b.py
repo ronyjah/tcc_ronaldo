@@ -112,29 +112,23 @@ class Test163b:
 
                 if not sent_reconfigure:
                     time.sleep(3)
-                    print('aqui7')
+
                     self.__config_setup1_1.set_ipv6_src(self.__config.get('wan','link_local_addr'))
-                    print('aqui8')
+
                     self.__config_setup1_1.set_ipv6_dst(self.__config_setup1_1.get_local_addr_ceRouter())
-                    print('aqui10')
+
                     self.__config_setup1_1.set_ether_src(self.__config.get('wan','link_local_mac'))
-                    print('aqui11')
+
                     self.__config_setup1_1.set_ether_dst(self.__config_setup1_1.get_mac_ceRouter())
-                    print('aqui12')
+
                     self.__config_setup1_1.set_dhcp_reconf_type(self.__config.get('t1.6.3','msg_type'))
-                    print('aqui13')
+
                     self.__config_setup1_1.set_udp_sport('547')
                     self.__config_setup1_1.set_udp_dport('546')
                     self.__sendmsgs.send_dhcp_reconfigure(self.__config_setup1_1)
-                    print('aqui14')
+
                     sent_reconfigure = True                
-                # if pkt.haslayer(DHCP6_Solicit):
-                #     self.__packet_sniffer_wan.stop()
-                #     while not self.__queue_wan.empty():
-                #         pkt = self.__queue_wan.get() 
-                #     return True
-        # while not pkt.haslayer(IPv6):
-        #     pkt = self.__queue_wan.get()      
+     
         self.__packet_sniffer_wan.stop()
         return False
      
