@@ -3,7 +3,6 @@ import logging
 from test161 import Test161
 from test162a import Test162a
 from test162b import Test162b
-from test162c import Test162c
 from test163a import Test163a
 from test163b import Test163b
 from test163c import Test163c
