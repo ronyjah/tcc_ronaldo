@@ -47,6 +47,7 @@ class Test324:
         self.__config_setup_lan = ConfigSetup1_1_Lan(self.__config,self.__lan_device)
 
     def set_flags(self):
+        logging.info('WAN: Setup1.1 concluido. Contador de 300 s iniciado afim de concluir o teste')
         self.__config_setup1_1.set_flag_M(self.__config.get('t3.2.4','flag_m'))
         self.__config_setup1_1.set_flag_0(self.__config.get('t3.2.4','flag_o'))
         self.__config_setup1_1.set_flag_chlim(self.__config.get('t3.2.4','flag_chlim'))
@@ -186,6 +187,7 @@ class Test324:
                     time.sleep(1)
                     t_test = t_test + 1
                     if t_test % 5 ==0:
+                        logging.info('LAN: Inicio das transmissões de RS e DHCP information por 30 s.')
                         self.send_dhcp_information()
                         self.send_rs_lan()
                     time.sleep(1)
@@ -214,6 +216,7 @@ class Test324:
                         self.send_local_na_lan(pkt)
                         
             if self.__config_setup1_1.get_setup1_1_OK():
+                logging.info('LAN: Setup1.1 concluido. Contador de 300 s iniciado afim de concluir o teste')
                 if pkt[Ether].src == self.__config.get('lan','mac_address'):
                     continue
                 if t_test1 < 300:
@@ -223,6 +226,7 @@ class Test324:
 
                     if pkt.haslayer(ICMPv6ND_RA):
                         if pkt[ICMPv6NDOptPrefixInfo].prefix == self.__config.get('t3.2.4','prefix_ula'):
+                                logging.info('LAN: Recebido prefixo esperado. Inciando tentativa de Pingar um endereco Global')
                                 self.ping_tn1_ula()
                         else:
                             self.__finish_wan = True
@@ -260,7 +264,7 @@ class Test324:
 
                 else: 
                     logging.info('TEST 3.2.4: UNIQUE LOCAL ADDRESS FORWARDING....REPROVADO')
-                    logging.info('Não foi recebido a mensagem Destino Inalcançável durante a execução do teste')
+                    logging.info('Nao foi recebido a mensagem Destino Inalcançável durante a execução do teste')
                     self.__packet_sniffer_wan.stop() 
                     self.__packet_sniffer_lan.stop()
                     self.__finish_wan = True 
@@ -271,7 +275,7 @@ class Test324:
         logging.info(self.__test_desc)
         logging.info('==================================================================================================')
         logging.info('Ative a ULA com prefixo: ' +  self.__config.get('t3.2.4','prefix_ula') + ' . E reinicie o Roteador') 
-        logging.info('==================================================================================================')
+        logging.info('===================================================================================================')
         time.sleep(10)
         self.__t_lan =  Thread(target=self.run_Lan,name='LAN_Thread')
         self.__t_lan.start()
@@ -299,9 +303,11 @@ class Test324:
                     time.sleep(1)
                     t_test = t_test + 1
                     if t_test % 10 == 0:
+                        logging.info('WAN: Inicio das transmissoes de Router Advertisment')
                         self.rourter_advertise()
                     
                     if start_time_count:
+                        logging.info('WAN: Inicio do novo contador apos Setup 1.1 concluido')
                         if time1 < 600:
                             time1 = time1 + 1
 
@@ -311,7 +317,7 @@ class Test324:
                 pkt = self.__queue_wan.get()
 
                 if not self.__config_setup1_1.get_ND_local_OK():
-
+                    logging.info('WAN: Inicio do setup 1.1. Pode demorar para concluir')
                     if pkt[Ether].src == self.__config.get('wan','link_local_mac'):
                         continue
 
@@ -324,7 +330,7 @@ class Test324:
 
                         if pkt[Ether].src == self.__config.get('wan','ra_mac'):
                             continue
-
+                        
                         self.__config_setup1_1.set_local_addr_ceRouter(pkt[IPv6].src)
                         self.__config_setup1_1.set_mac_ceRouter(pkt[Ether].src)    
 
@@ -339,9 +345,11 @@ class Test324:
 
                 if pkt.haslayer(ICMPv6ND_NS):
                     if pkt[ICMPv6ND_NS].tgt == self.__config.get('wan','global_wan_addr'):
+                        logging.info('WAN: Solicitado ICMP_NS para um target Global. Enviando NA global do host')
                         self.neighbor_advertise_global(pkt)
                         
                     if pkt[ICMPv6ND_NS].tgt == self.__config.get('wan','link_local_addr'):
+                        logging.info('WAN: Solicitado ICMP_NS para um target local. Enviando NA local host')
                         self.neighbor_advertise_local(pkt)
 
                 if not self.__config_setup1_1.get_setup1_1_OK():
@@ -359,22 +367,23 @@ class Test324:
                             self.__config_setup1_1.set_ether_dst(self.__config.get('multicast','all_mac_nodes'))
                             self.__config_setup1_1.set_ipv6_src(self.__config.get('wan','ra_address'))
                             self.__config_setup1_1.set_ipv6_dst(self.__config.get('multicast','all_nodes_addr'))
+                            logging.info('Solicitado ICMP_RS. Enviando RA_ver2')
                             self.__sendmsgs.send_tr1_RA2(self.__config_setup1_1)
 
                     else:
-                        logging.info('Reprovado Teste 2.7.3b - Falha em completar o Common Setup 1.1 da RFC')
+                        logging.info('WAN: Reprovado Teste 3.2.4 - Falha em completar o Common Setup 1.1 da RFC')
                         self.__packet_sniffer_wan.stop() 
                         return False
 
                 else:
-                    
+                    logging.info('WAN: Setup 1.1 Finalizado. Iniciando novo contador de tempo. O teste termina em 300 seg se a mensagem aguardada nao for recebida')
                     if not self.__finish_wan:
                         start_time_count = True
                         if time1 < 300:
                             
                             if pkt.haslayer(ICMPv6EchoRequest):
-                                logging.info('TEST 3.2.4: UNIQUE LOCAL ADDRESS FORWARDING....REPROVADO')
-                                logging.info('Indevido recebimento de Echo Request na WAN de um IP proveniente pela ULA do roteador atribuido aos hosts na LAN')
+                                logging.info('WAN: TEST 3.2.4: UNIQUE LOCAL ADDRESS FORWARDING....REPROVADO')
+                                logging.info('WAN: Indevido recebimento de Echo Request na WAN de um IP proveniente pela ULA do roteador atribuido aos hosts na LAN')
                                 self.__packet_sniffer_wan.stop() 
                                 self.__packet_sniffer_lan.stop()
                                 self.__finish_wan = True 
@@ -396,8 +405,8 @@ class Test324:
                         else:            
                             self.__packet_sniffer_wan.stop() 
                             self.__packet_sniffer_lan.stop()
-                            logging.info('TEST 3.2.4: UNIQUE LOCAL ADDRESS FORWARDING....REPROVADO')
-                            logging.info('Time out sem mensagem Unreacheable na interface LAN')
+                            logging.info('WAN: TEST 3.2.4: UNIQUE LOCAL ADDRESS FORWARDING....REPROVADO')
+                            logging.info('WAN: Time out sem mensagem Unreacheable na interface LAN')
                             return True        
                     else:
                         self.__packet_sniffer_wan.stop()
