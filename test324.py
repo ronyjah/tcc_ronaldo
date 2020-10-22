@@ -14,10 +14,13 @@ from commontestsetup1_1 import CommonTestSetup1_1
 from sendmsgs import SendMsgs
 from configsetup1_1 import ConfigSetup1_1
 from configsetup1_1_lan import ConfigSetup1_1_Lan
+from duplicatefilter import DuplicateFilter
 format = "%(asctime)s: %(message)s"
 logging.basicConfig(format=format, level=logging.DEBUG,
                     datefmt="%H:%M:%S")
-
+logging = logging.getLogger(__name__)
+d = DuplicateFilter(logging)
+logging.addFilter(d)
 class Test324:
 
     def __init__(self,config):
@@ -69,7 +72,6 @@ class Test324:
         self.__config_setup_lan.set_xid(self.__config.get('solicitlan','xid'))
         self.__config_setup_lan.set_fdqn(self.__config.get('solicitlan','clientfqdn'))
         self.__config_setup_lan.set_vendor_class(self.__config.get('solicitlan','vendorclass'))
-
         self.__config_setup_lan.set_enterprise(self.__config.get('solicitlan','enterpriseid'))
         self.__config_setup_lan.set_client_duid(self.__config.get('solicitlan','duid'))
         self.__config_setup_lan.set_iaid(self.__config.get('solicitlan','iaid'))
@@ -111,9 +113,6 @@ class Test324:
         self.__config_setup_lan.set_mac_ceRouter(pkt[Ether].src)
         self.__sendmsgs.send_icmp_na_lan(self.__config_setup_lan)
 
-
-
-
     def send_local_na_lan(self,pkt):
         self.__config_setup_lan.set_ipv6_src(self.__config.get('lan','lan_local_addr'))
         self.__config_setup_lan.set_ether_src(self.__config.get('lan','mac_address'))
@@ -130,7 +129,6 @@ class Test324:
         self.__config_setup1_1.set_ipv6_src(self.__config.get('wan','ra_address'))
         self.__config_setup1_1.set_ipv6_dst(self.__config.get('multicast','all_nodes_addr'))
         self.__sendmsgs.send_tr1_RA2(self.__config_setup1_1)
-
 
     def ping(self):
         if self.__config_setup1_1.get_mac_ceRouter() != None:
@@ -369,14 +367,14 @@ class Test324:
                         return False
 
                 else:
-
+                    
                     if not self.__finish_wan:
                         start_time_count = True
                         if time1 < 300:
                             
                             if pkt.haslayer(ICMPv6EchoRequest):
                                 logging.info('TEST 3.2.4: UNIQUE LOCAL ADDRESS FORWARDING....REPROVADO')
-                                logging.info('Indevido recebimento de Echo Request na WAN de um IP proveniente pela ULA do roteador e atribuido na LAN')
+                                logging.info('Indevido recebimento de Echo Request na WAN de um IP proveniente pela ULA do roteador atribuido aos hosts na LAN')
                                 self.__packet_sniffer_wan.stop() 
                                 self.__packet_sniffer_lan.stop()
                                 self.__finish_wan = True 
