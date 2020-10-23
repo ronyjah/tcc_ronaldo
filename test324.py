@@ -15,6 +15,16 @@ from sendmsgs import SendMsgs
 from configsetup1_1 import ConfigSetup1_1
 from configsetup1_1_lan import ConfigSetup1_1_Lan
 from duplicatefilter import DuplicateFilter
+from flask import Flask,send_file
+import time
+from flask_cors import CORS
+import requests
+
+import logging
+
+import json
+
+app = Flask(__name__)
 format = "%(asctime)s: %(message)s"
 logging.basicConfig(format=format, level=logging.DEBUG,
                     datefmt="%H:%M:%S")
@@ -44,6 +54,7 @@ class Test324:
         self.__dhcp_renew_done = False
         self.stop_ping_OK = False
         self.ipsrc = None
+        self.msg = None
         self.__config_setup_lan = ConfigSetup1_1_Lan(self.__config,self.__lan_device)
 
     def set_flags(self):
@@ -181,6 +192,7 @@ class Test324:
         reset_test1 = False
         self.set_flags_lan()
         self.__config_setup_lan.set_setup_lan_start()
+        cache_lan = []
         while not self.__queue_lan.full():
             if self.__queue_lan.empty():
                 if t_test < 30:
@@ -195,7 +207,8 @@ class Test324:
                     time_over = True
             else:
                 pkt = self.__queue_lan.get()
-
+                cache_lan.append(pkt)
+                wrpcap("lan.cap",cache_lan)
                 if pkt.haslayer(ICMPv6ND_RA):
                     self.__config_setup_lan.set_mac_ceRouter(pkt[Ether].src)
 
@@ -240,7 +253,7 @@ class Test324:
                     if pkt.haslayer(ICMPv6DestUnreach):
                         self.__finish_wan = True
                         self.__fail_test = False
-                        self.__packet_sniffer_wan.stop() 
+                        #self.__packet_sniffer_wan.stop() 
                         self.__packet_sniffer_lan.stop()
                         logging.info('TEST 3.2.4: UNIQUE LOCAL ADDRESS FORWARDING....APROVADO')
                         return True   
@@ -271,15 +284,50 @@ class Test324:
                     self.__fail_test = False
                     return False    
 
+
+    class Counter():
+        def __init__(self):
+            self.counter = 0
+
+        def increment(self):
+            self.counter += 1
+
+        def reset(self):
+            self.counter = 0
+        def get_value(self):
+            return self.counter
+
+ 
+    @app.route(self,"/aprovado",methods=['POST'])
+    def envia(self):
+        # mc.increment()
+        # i = mc.get_value()
+        # print('Produtos aprovados: ' + str(i))
+        print('APROVADO!!!!!!!!!!!!!!!!!!')
+        #return send_file('/home/ronaldo/tcc_oficial/tcc_ronaldo/lan.cap', attachment_filename='lan.cap')
+        return 'PRODUTO APROVADO'
+        #return self.msg
+
+    def start_flask(self):
+        CORS(app)
+        app.run(host='0.0.0.0')
+
+
+
     def run(self):
+        self.__t_flask =  Thread(target=self.start_flask,name='Flask server',daemon=True)
+        self.__t_flask.start() 
         logging.info(self.__test_desc)
         logging.info('==================================================================================================')
         logging.info('Ative a ULA com prefixo: ' +  self.__config.get('t3.2.4','prefix_ula') + ' . E reinicie o Roteador') 
         logging.info('===================================================================================================')
+        self.msg = 'Ative a ULA com prefixo: ' +  self.__config.get('t3.2.4','prefix_ula') + ' . E reinicie o Roteador'
         time.sleep(10)
         self.__t_lan =  Thread(target=self.run_Lan,name='LAN_Thread')
         self.__t_lan.start()
-        
+       
+
+
         self.__packet_sniffer_wan = PacketSniffer('Test273b-WAN',self.__queue_wan,self,self.__config,self.__wan_device_tr1)
         self.__packet_sniffer_wan.start()
         
@@ -295,10 +343,12 @@ class Test324:
         start_time_count = False
         finish_wan = False
         part1_OK = False
+        cache_wan = []
         self.__config_setup1_1.set_pd_prefixlen(self.__config.get('t3.2.4','pd_prefixlen')) 
         self.__config_setup1_1.set_routerlifetime(self.__config.get('t3.2.4','routerlifetime')) 
         while not self.__queue_wan.full():
             if self.__queue_wan.empty():
+                
                 if t_test <= 300:
                     time.sleep(1)
                     t_test = t_test + 1
@@ -307,7 +357,7 @@ class Test324:
                         self.rourter_advertise()
                     
                     if start_time_count:
-                        logging.info('WAN: Inicio do novo contador apos Setup 1.1 concluido')
+                        logging.info('WAN: Inicio do novo temporizador. Setup 1.1 concluido')
                         if time1 < 600:
                             time1 = time1 + 1
 
@@ -315,7 +365,8 @@ class Test324:
                     time_over = True      
             else:
                 pkt = self.__queue_wan.get()
-
+                cache_wan.append(pkt)
+                wrpcap("wAN.cap",cache_wan)
                 if not self.__config_setup1_1.get_ND_local_OK():
                     logging.info('WAN: Inicio do setup 1.1. Pode demorar para concluir')
                     if pkt[Ether].src == self.__config.get('wan','link_local_mac'):
