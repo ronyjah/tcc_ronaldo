@@ -15,7 +15,7 @@ from sendmsgs import SendMsgs
 from configsetup1_1 import ConfigSetup1_1
 from configsetup1_1_lan import ConfigSetup1_1_Lan
 from duplicatefilter import DuplicateFilter
-from flask import Flask,send_file
+from flask import Flask,send_file,g,current_app,session
 import time
 from flask_cors import CORS
 import requests
@@ -31,6 +31,10 @@ logging.basicConfig(format=format, level=logging.DEBUG,
 logging = logging.getLogger(__name__)
 d = DuplicateFilter(logging)
 logging.addFilter(d)
+
+
+
+
 class Test324:
 
     def __init__(self,config):
@@ -54,7 +58,8 @@ class Test324:
         self.__dhcp_renew_done = False
         self.stop_ping_OK = False
         self.ipsrc = None
-        self.msg = None
+        self.msg = 'olamundo'
+        self.status = 'inicial'
         self.__config_setup_lan = ConfigSetup1_1_Lan(self.__config,self.__lan_device)
 
     def set_flags(self):
@@ -285,47 +290,67 @@ class Test324:
                     return False    
 
 
-    class Counter():
-        def __init__(self):
-            self.counter = 0
+    # @app.before_request
+    # def before_request_func():
+    #         with app.app_context():
+    #             g.var = self.msg
 
-        def increment(self):
-            self.counter += 1
 
-        def reset(self):
-            self.counter = 0
-        def get_value(self):
-            return self.counter
+    # def generate_report(self):
+    #     format = request.args.get('format')
 
- 
-    @app.route(self,"/aprovado",methods=['POST'])
-    def envia(self):
-        # mc.increment()
-        # i = mc.get_value()
-        # print('Produtos aprovados: ' + str(i))
-        print('APROVADO!!!!!!!!!!!!!!!!!!')
-        #return send_file('/home/ronaldo/tcc_oficial/tcc_ronaldo/lan.cap', attachment_filename='lan.cap')
-        return 'PRODUTO APROVADO'
-        #return self.msg
 
+
+
+    
     def start_flask(self):
         CORS(app)
+        app.config["SECRET_KEY"] = 'olamundo'
         app.run(host='0.0.0.0')
 
+    def set_status(self,v):
+        self.msg = v
 
-
+    def get_status(self):
+        return self.msg
     def run(self):
+        
+
+        self.set_status('inicio')
+
+        
+        print (self.get_status())
+        @app.route("/aprovado",methods=['GET'])
+        def envia():
+            session.clear()
+            # request.args.get("light_position")
+            # mc.increment()
+            # i = mc.get_value()
+            # print('Produtos aprovados: ' + str(i))
+            #print('APROVADO!!!!!!!!!!!!!!!!!!')
+            #return send_file('/home/ronaldo/tcc_oficial/tcc_ronaldo/lan.cap', attachment_filename='lan.cap')
+            #return 'PRODUTO APROVADO'
+            
+            return self.get_status()
+
+
+
+
         self.__t_flask =  Thread(target=self.start_flask,name='Flask server',daemon=True)
-        self.__t_flask.start() 
+        self.__t_flask.start()
+
         logging.info(self.__test_desc)
         logging.info('==================================================================================================')
         logging.info('Ative a ULA com prefixo: ' +  self.__config.get('t3.2.4','prefix_ula') + ' . E reinicie o Roteador') 
         logging.info('===================================================================================================')
-        self.msg = 'Ative a ULA com prefixo: ' +  self.__config.get('t3.2.4','prefix_ula') + ' . E reinicie o Roteador'
+        #self.msg = 'Ative a ULA com prefixo: ' +  self.__config.get('t3.2.4','prefix_ula') + ' . E reinicie o Roteador'
         time.sleep(10)
         self.__t_lan =  Thread(target=self.run_Lan,name='LAN_Thread')
         self.__t_lan.start()
-       
+        self.set_status('inicio1')
+
+
+
 
 
         self.__packet_sniffer_wan = PacketSniffer('Test273b-WAN',self.__queue_wan,self,self.__config,self.__wan_device_tr1)
@@ -364,6 +389,7 @@ class Test324:
                 else:
                     time_over = True      
             else:
+                set_status('inicio2')
                 pkt = self.__queue_wan.get()
                 cache_wan.append(pkt)
                 wrpcap("wAN.cap",cache_wan)
