@@ -11,10 +11,11 @@ cd tcc_ronaldo
 ```
 
 ## Usage
-1. Open the file **rfclan.conf** in section **LAN**, edit the parameter **lan_device** to device name connected on LAN of Router Under Test.
-2. In section **WAN**, change parameter **device_wan_tr1** to device name connected on WAN of Router Under Test.
-3. Open the file **cerouter.py**, in function **activate** uncomment the test wishes to run (**Select just one per test**).
-4. Run the script as super user:
+1. Disable IPv6 support of SO. Change for sudo user, sysctl -w net.ipv6.conf.all.disable_ipv6=1
+2. Open the file **rfclan.conf** in section **LAN**, edit the parameter **lan_device** to device name connected on LAN of Router Under Test.
+3. In section **WAN**, change parameter **device_wan_tr1** to device name connected on WAN of Router Under Test.
+4. Open the file **cerouter.py**, in function **activate** uncomment the test wishes to run (**Select just one per test**).
+5. Run the script as super user:
 
 ```bash
 source venv/bin/activate
