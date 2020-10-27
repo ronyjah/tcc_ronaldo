@@ -323,11 +323,6 @@ class Test324:
 
 
 
-    
-    def start_flask(self):
-        CORS(app)
-        app.config["SECRET_KEY"] = 'olamundo'
-        app.run(host='0.0.0.0')
 
     def set_status(self,v):
         self.msg = v
@@ -336,33 +331,20 @@ class Test324:
         return self.msg
     def run(self):
         
-
         self.set_status('Ative a ULA com prefixo: ' +  self.__config.get('t3.2.4','prefix_ula') + ' . E reinicie o Roteador')
 
         @self.__app.route("/WAN",methods=['GET'])
         def enviawan():
             return self.get_status()
 
-
-
-
-        # self.__t_flask =  Thread(target=self.start_flask,name='Flask server',daemon=False)
-        # self.__t_flask.start()
-
         logging.info(self.__test_desc)
         logging.info('==================================================================================================')
         logging.info('Ative a ULA com prefixo: ' +  self.__config.get('t3.2.4','prefix_ula') + ' . E reinicie o Roteador') 
-        logging.info('===================================================================================================')
-        #self.msg = 'Ative a ULA com prefixo: ' +  self.__config.get('t3.2.4','prefix_ula') + ' . E reinicie o Roteador'
+        logging.info('===================================================================================================')        
         time.sleep(10)
         self.__t_lan =  Thread(target=self.run_Lan,name='LAN_Thread')
         self.__t_lan.start()
         self.set_status('Thread LAN Criada')
-
-
-
-
-
         self.__packet_sniffer_wan = PacketSniffer('Test273b-WAN',self.__queue_wan,self,self.__config,self.__wan_device_tr1)
         self.__packet_sniffer_wan.start()
         self.set_status('Sniffer WAN Inciado')
@@ -401,7 +383,11 @@ class Test324:
                             time1 = time1 + 1
 
                 else:
-                    self.set_status('WAN: Timeout Teste')
+                    self.__packet_sniffer_wan.stop() 
+                    self.__packet_sniffer_lan.stop()
+                    self.set_status('Timeout')
+                    time.sleep(2)
+                    self.set_status('REPROVADO')
                     time_over = True      
             else:
                 
