@@ -17,7 +17,7 @@ logging.basicConfig(format=format, level=logging.DEBUG,
                     datefmt="%H:%M:%S")
 class Test161:
 
-    def __init__(self,config):
+    def __init__(self,config,app):
         self.__queue = Queue()
         self.__config = config
         self.__interface = None

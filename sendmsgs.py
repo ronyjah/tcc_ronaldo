@@ -18,6 +18,9 @@ format = "%(asctime)s: %(message)s"
 logging.basicConfig(format=format, level=logging.DEBUG,
                     datefmt="%H:%M:%S")
 
+log = logging.getLogger('scrapy')
+log.setLevel(logging.ERROR)
+
 class SendMsgs:
 
     def __init__(self,config):
@@ -262,21 +265,21 @@ class SendMsgs:
             self.ipv6(fields)/\
             self.icmpv6_ra(fields)/\
             self.icmpv6_pd(fields),\
-            iface=self.__wan_device_tr1,inter=1)
+            iface=self.__wan_device_tr1,inter=1,verbose=False)
 
     def send_tr1_RA2(self,fields=None):
         sendp(self.ether(fields)/\
             self.ipv6(fields)/\
             self.icmpv6_ra2(fields)/\
             self.icmpv6_pd(fields),\
-            iface=self.__wan_device_tr1,inter=1)
+            iface=self.__wan_device_tr1,inter=1,verbose=False)
 
 
     def send_tr1_RA_no_IA_PD(self,fields=None):
         sendp(self.ether(fields)/\
             self.ipv6(fields)/\
             self.icmpv6_ra(fields),\
-            iface=self.__wan_device_tr1,inter=1)
+            iface=self.__wan_device_tr1,inter=1,verbose=False)
 
     def send_dhcp_advertise(self,fields=None):
         sendp(self.ether(fields)/\
@@ -289,7 +292,7 @@ class SendMsgs:
             self.opt_ia_pd(fields)/\
             self.opt_dns_server()/\
             self.opt_dns_domain(),\
-            iface=self.__wan_device_tr1,inter=1)
+            iface=self.__wan_device_tr1,inter=1,verbose=False)
 
     def send_dhcp_advertise_no_IA_PD(self,fields=None):
         sendp(self.ether(fields)/\
@@ -301,7 +304,7 @@ class SendMsgs:
             self.opt_ia_na(fields)/\
             self.opt_dns_server()/\
             self.opt_dns_domain(),\
-            iface=self.__wan_device_tr1,inter=1)
+            iface=self.__wan_device_tr1,inter=1,verbose=False)
 
     def send_dhcp_reply(self,fields=None):
         sendp(self.ether(fields)/\
@@ -316,7 +319,7 @@ class SendMsgs:
             self.dhcp_reconf_accept()/\
             self.opt_dns_server()/\
             self.opt_dns_domain(),\
-            iface=self.__wan_device_tr1,inter=1)
+            iface=self.__wan_device_tr1,inter=1,verbose=False)
 
     def send_dhcp_reply_v2(self,fields=None):
         sendp(self.ether(fields)/\
@@ -331,7 +334,7 @@ class SendMsgs:
             self.dhcp_reconf_accept()/\
             self.opt_dns_server()/\
             self.opt_dns_domain(),\
-            iface=self.__wan_device_tr1,inter=1)
+            iface=self.__wan_device_tr1,inter=1,verbose=False)
 
     def send_dhcp_reply_v3(self,fields=None):
         sendp(self.ether(fields)/\
@@ -346,21 +349,21 @@ class SendMsgs:
             self.dhcp_reconf_accept()/\
             self.opt_dns_server()/\
             self.opt_dns_domain(),\
-            iface=self.__wan_device_tr1,inter=1)
+            iface=self.__wan_device_tr1,inter=1,verbose=False)
 
     def send_echo_request(self,fields=None,contador=None):
         sendp(self.ether(fields)/\
             self.ipv6(fields)/\
             self.echo_request()/\
             Raw(load='abcdef'),\
-            iface=self.__wan_device_tr1,inter=1)
+            iface=self.__wan_device_tr1,inter=1,verbose=False)
 
     def send_echo_request_lan(self,fields=None,contador=None):
         sendp(self.ether(fields)/\
             self.ipv6(fields)/\
             self.echo_request()/\
             Raw(load='abcdef'),\
-            iface=self.__lan_device,inter=1)
+            iface=self.__lan_device,inter=1,verbose=False)
 
 
     def send_echo_reply(self,fields=None,contador=None):
@@ -368,7 +371,7 @@ class SendMsgs:
             self.ipv6(fields)/\
             self.echo_reply()/\
             Raw(load='abcdef'),\
-            iface=self.__wan_device_tr1,inter=1)
+            iface=self.__wan_device_tr1,inter=1,verbose=False)
 
             
     def send_icmp_ns(self,fields=None,contador=None):
@@ -376,21 +379,21 @@ class SendMsgs:
             self.ipv6(fields)/\
             self.icmpv6_ns(fields)/\
             self.icmpv6_src_lla(fields),\
-            iface=self.__wan_device_tr1,inter=1)
+            iface=self.__wan_device_tr1,inter=1,verbose=False)
 
     def send_icmp_rs(self,fields=None,contador=None):
         sendp(self.ether(fields)/\
             self.ipv6(fields)/\
             self.icmpv6_rs(fields)/\
             self.icmpv6_src_lla(fields),\
-            iface=self.__lan_device,inter=1)
+            iface=self.__lan_device,inter=1,verbose=False)
 
     def send_icmp_na(self,fields=None,contador=None):
         sendp(self.ether(fields)/\
             self.ipv6(fields)/\
             self.icmpv6_na(fields)/\
             self.icmpv6_lla(fields),\
-            iface=self.__wan_device_tr1,inter=1)
+            iface=self.__wan_device_tr1,inter=1,verbose=False)
 
     def send_dhcp_reconfigure(self,fields=None):
         s = int(self.__rep_base,16) + 1
@@ -416,7 +419,7 @@ class SendMsgs:
             self.dhcp_server_id(fields)/\
             self.dhcp_reconfigure(fields)/\
             self.dhcp_auth(),\
-            iface=self.__wan_device_tr1,inter=1)
+            iface=self.__wan_device_tr1,inter=1,verbose=False)
         
     def send_dhcp_reconfigure_no_auth(self,fields=None):
         sendp(self.ether(fields)/\
@@ -426,7 +429,7 @@ class SendMsgs:
             self.dhcp_client_id(fields)/\
             self.dhcp_server_id(fields)/\
             self.dhcp_reconfigure(fields),\
-            iface=self.__wan_device_tr1,inter=1)
+            iface=self.__wan_device_tr1,inter=1,verbose=False)
 
     def send_dhcp_reconfigure_wrong(self,fields=None):
         s = int(self.__rep_base,16) + 1
@@ -451,7 +454,7 @@ class SendMsgs:
             self.dhcp_server_id(fields)/\
             self.dhcp_reconfigure(fields)/\
             self.dhcp_auth(),\
-            iface=self.__wan_device_tr1,inter=1)
+            iface=self.__wan_device_tr1,inter=1,verbose=False)
 
     def send_dhcp_information(self,fields=None):
         sendp(self.ether(fields)/\
@@ -462,7 +465,7 @@ class SendMsgs:
             self.dhcp_client_id_lan(fields)/\
             self.opt_vendor_class(fields)/\
             self.opt_req(fields),\
-            iface=fields.get_lan_device(),inter=1)            
+            iface=fields.get_lan_device(),inter=1,verbose=False)            
 
     def send_dhcp_solicit_ia_na(self,fields=None):
         sendp(self.ether(fields)/\
@@ -475,18 +478,18 @@ class SendMsgs:
             self.opt_vendor_class(fields)/\
             self.opt_ia_na_lan(fields)/\
             self.opt_req(fields),\
-            iface=self.__lan_device,inter=1)
+            iface=self.__lan_device,inter=1,verbose=False)
 
     def send_icmp_na_lan(self,fields=None,contador=None):
         sendp(self.ether(fields)/\
             self.ipv6(fields)/\
             self.icmpv6_na_lan(fields)/\
             self.icmpv6_lla_dst_lan(fields),\
-            iface=self.__lan_device,inter=1)
+            iface=self.__lan_device,inter=1,verbose=False)
 
     def send_icmp_ns_lan(self,fields=None,contador=None):
         sendp(self.ether(fields)/\
             self.ipv6(fields)/\
             self.icmpv6_ns(fields)/\
             self.icmpv6_src_lla(fields),\
-            iface=self.__lan_device,inter=1)
+            iface=self.__lan_device,inter=1,verbose=False)

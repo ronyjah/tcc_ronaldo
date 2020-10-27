@@ -1,0 +1,519 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="description" content="">
+<meta name="author" content="Mark Otto, Jacob Thornton, and Bootstrap contributors">
+<meta name="generator" content="Jekyll v4.1.1">
+<title>RFC 7084 Tester Tool</title>
+
+<link rel="canonical" href="https://getbootstrap.com/docs/4.5/examples/starter-template/">
+
+<!-- Bootstrap core CSS -->
+<link href="../assets/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<style>
+.bd-placeholder-img {
+font-size: 1.125rem;
+text-anchor: middle;
+-webkit-user-select: none;
+-moz-user-select: none;
+-ms-user-select: none;
+user-select: none;
+}
+
+@media (min-width: 768px) {
+.bd-placeholder-img-lg {
+font-size: 3.5rem;
+}
+}
+.sidenav {
+height: 100%;
+width: 200px;
+position: fixed;
+z-index: 1;
+top: 70px;
+left: 0;
+overflow-x: hidden;
+padding-top: 20px;
+}
+
+.logo-image{
+width: 50px;
+height: 50px;
+
+margin-top: 6px;
+}
+.table2 {
+margin-left: 10rem;
+margin-top: 60px;
+width: 950px;
+}
+.mar2 {
+margin-left: 10px;
+}
+
+.mar3 {
+margin-left: 60px;
+}
+.loader {
+border: 5px solid #f3f3f3; /* Light grey */
+border-top: 5px solid #3498db; /* Blue */
+border-radius: 50%;
+width: 20px;
+height: 20px;
+animation: spin 2s linear infinite;
+}
+
+@keyframes spin {
+0% { transform: rotate(0deg); }
+100% { transform: rotate(360deg); }
+}
+.sidenav a {
+padding: 6px 6px 6px 32px;
+text-decoration: none;
+font-size: 25px;
+color: #818181;
+display: block;
+}
+
+.sidenav a:hover {
+color: #f1f1f1;
+}
+
+.main {
+margin-left: 200px; /* Same as the width of the sidenav */
+}
+
+@media screen and (max-height: 450px) {
+.sidenav {padding-top: 15px;}
+.sidenav a {font-size: 18px;}
+}
+
+
+
+#table-scroll {
+  height:400px;
+  overflow-x:hidden;
+  overflow-y:auto;
+  margin-top:100px;
+}
+
+
+
+
+
+
+
+
+
+</style>
+<!-- Custom styles for this template -->
+<link href="starter-template.css" rel="stylesheet">
+</head>
+<body>
+<nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
+<a class="logo-image" href="/"> <img src="image.png" class="img-fluid">
+<a class="navbar-brand mar2">RFC 7084 Tool Tester </a>
+</a>
+<!-- <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
+<span class="navbar-toggler-icon"></span>
+</button>
+
+<div class="collapse navbar-collapse" id="navbarsExampleDefault">
+<ul class="navbar-nav mr-auto">
+<li class="nav-item active">
+<a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a>
+</li>
+<li class="nav-item">
+<a class="nav-link" href="#">Link</a>
+</li>
+<li class="nav-item">
+<a class="nav-link disabled" href="#" tabindex="-1" aria-disabled="true">Disabled</a>
+</li>
+<li class="nav-item dropdown">
+<a class="nav-link dropdown-toggle" href="#" id="dropdown01" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Dropdown</a>
+<div class="dropdown-menu" aria-labelledby="dropdown01">
+<a class="dropdown-item" href="#">Action</a>
+<a class="dropdown-item" href="#">Another action</a>
+<a class="dropdown-item" href="#">Something else here</a>
+</div>
+</li>
+</ul>
+<form class="form-inline my-2 my-lg-0">
+<input class="form-control mr-sm-2" type="text" placeholder="Search" aria-label="Search">
+<button class="btn btn-secondary my-2 my-sm-0" type="submit">Search</button>
+</form> -->
+</div>
+</nav>
+<!-- <div class="sidenav bg-dark navbar-dark">
+<a href="#">Testes</a>
+<a href="#">Capturas</a>
+<a href="#">Relatórios</a>
+</div> -->
+<main role="main" class="container">
+
+<!-- <div class="starter-template">
+<h1>Bootstrap starter template</h1>
+<p class="lead">Use this document as a way to quickly start any new project.<br> All you get is this text and a mostly barebones HTML document.</p>
+</div> -->
+<!-- <span class="badge badge-primary">Testando</span>
+<span class="badge badge-success">Successo</span>
+<span class="badge badge-warning">Pendente</span>
+<span class="badge badge-dark">Testar</span>
+<span class="badge badge-danger">Falha</span> -->
+
+
+
+    <div id="table-scroll">
+<table class="table table2">
+<thead>
+<tr>
+<th scope="col">Test</th>
+<th scope="col">Group</th>
+<th scope="col">Action</th>
+<!-- td><span id="status1" class="badge badge-success">Successo</span></td> -->
+<!-- <td><span id="status4" class="badge badge-warning">Pendente</span></td> -->
+</tr>
+</thead>
+<tbody >
+<tr>
+<th scope="row">
+1.6.1: ROUTER SOLICITATION TRANSMISSION
+</th>
+<td>WAN</td>
+<td><button id="Test161" class="badge badge-dark" onclick="toggleButton(this.id);" >Run</button></td>
+</tr>
+<tr>
+<th scope="row">1.6.2: L FLAG PROCESSING Part A</th>
+<td>WAN</td>
+<td><button id="Test162a" class="badge badge-dark" onclick=" toggleButton(this.id);" >Run</button></td>
+</tr>
+
+<tr>
+    <th scope="row">1.6.2: L FLAG PROCESSING Part B</th>
+    <td>WAN</td>
+    <td><button id="Test162b" class="badge badge-dark" onclick=" toggleButton(this.id);" >Run</button></td>
+    </tr>
+
+<tr>
+<th scope="row">1.6.3: RECONFIGURE MESSAGE: Part A</th>
+<td>WAN</td>
+<td><button id="Test163a" class="badge badge-dark" onclick=" toggleButton(this.id);" >Run</button></td>
+
+
+<tr>
+    <th scope="row"> 1.6.3: RECONFIGURE MESSAGE: Part b</th>
+    <td>WAN</td>
+    <td><button id="Test163b" type="button" class="badge badge-dark" onclick=" toggleButton(this.id);">Run</button></td>
+    </tr>
+
+
+<tr>
+    <th scope="row"> 1.6.3: RECONFIGURE MESSAGE: Part C</th>
+    <td>WAN</td>
+    <td><button id="Test163c" type="button" class="badge badge-dark" onclick=" toggleButton(this.id);">Run</button></td>
+    </tr>
+
+
+
+<tr>
+    <th scope="row"> 1.6.3: RECONFIGURE MESSAGE: Part D</th>
+    <td>WAN</td>
+    <td><button id="Test163d" type="button" class="badge badge-dark" onclick=" toggleButton(this.id);">Run</button></td>
+    </tr>
+
+
+
+
+<tr>
+    <th scope="row"> 1.6.4: M FLAG PROCESSING</th>
+    <td>WAN</td>
+    <td><button id="Test164" type="button" class="badge badge-dark" onclick=" toggleButton(this.id);">Run</button></td>
+    </tr>
+
+
+<tr>
+    <th scope="row"> 1.6.5: PREFIX DELEGATION SIZE</th>
+    <td>WAN</td>
+    <td><button id="Test165" type="button" class="badge badge-dark" onclick=" toggleButton(this.id);">Run</button></td>
+    </tr>
+
+
+<tr>
+    <th scope="row"> 1.6.6: M AND O FLAG FOR PREFIX DELEGATION Part A</th>
+    <td>WAN</td>
+    <td><button id="Test166a" type="button" class="badge badge-dark" onclick=" toggleButton(this.id);">Run</button></td>
+    </tr>
+
+
+<tr>
+    <th scope="row"> 1.6.6: M AND O FLAG FOR PREFIX DELEGATION Part B</th>
+    <td>WAN</td>
+    <td><button id="Test166b" type="button" class="badge badge-dark" onclick=" toggleButton(this.id);">Run</button></td>
+    </tr>
+
+    
+
+<tr>
+    <th scope="row"> 1.6.7: DYNAMIC ROUTING PROTOCOL</th>
+    <td>WAN</td>
+    <td><button id="Test167" type="button" class="badge badge-dark" onclick=" toggleButton(this.id);">Run</button></td>
+    </tr>
+
+
+</tr>
+<tr>
+<th scope="row">2.7.1: ASSIGNING PREFIXES TO LAN INTERFACES Part A</th>
+<td>LAN</td>
+<td><button id="Test271a" type="button" class="badge badge-dark" onclick=" toggleButton(this.id);">Run</button></td>
+</tr>
+
+
+<tr>
+    <th scope="row"> 2.7.1: ASSIGNING PREFIXES TO LAN INTERFACES Part B</th>
+    <td>LAN</td>
+    <td><button id="Test271b" type="button" class="badge badge-dark" onclick=" toggleButton(this.id);">Run</button></td>
+    </tr>
+
+    <tr>
+        <th scope="row"> 2.7.1: ASSIGNING PREFIXES TO LAN INTERFACES Part C</th>
+        <td>LAN</td>
+      <td><button id="Test271c" type="button" class="badge badge-dark" onclick=" toggleButton(this.id);">Run</button></td>
+        </tr>
+
+    <tr>
+    <th scope="row"> 2.7.2: ROUTE INFORMATION OPTION Part A</th>
+    <td>LAN</td>
+    <td><button id="Test272a" type="button" class="badge badge-dark" onclick=" toggleButton(this.id);">Run</button></td>
+    </tr>
+
+    <tr>
+    <th scope="row"> 2.7.2: ROUTE INFORMATION OPTION Part B</th>
+    <td>LAN</td>
+    <td><button id="Test272b" type="button" class="badge badge-dark" onclick=" toggleButton(this.id);">Run</button></td>
+    </tr>
+    <tr>
+    <th scope="row"> 2.7.3: NO PREFIXES DELEGATED Part A</th>
+    <td>LAN</td>
+    <td><button id="Test273a" type="button" class="badge badge-dark" onclick=" toggleButton(this.id);">Run</button></td>
+    </tr>
+
+    <tr>
+    <th scope="row"> 2.7.3: NO PREFIXES DELEGATED Part B</th>
+    <td>LAN</td>
+    <td><button id="Test273b" type="button" class="badge badge-dark" onclick=" toggleButton(this.id);">Run</button></td>
+    </tr>
+
+    <tr>
+    <th scope="row"> 2.7.3: NO PREFIXES DELEGATED Part C</th>
+    <td>LAN</td>
+    <td><button id="Test273c" type="button" class="badge badge-dark" onclick=" toggleButton(this.id);">Run</button></td>
+    </tr>
+
+    <tr>
+    <th scope="row"> 2.7.4: DNS INFORMATION IN ROUTER ADVERTISEMENT PART A</th>
+    <td>LAN</td>
+    <td><button id="Test274a" type="button" class="badge badge-dark" onclick=" toggleButton(this.id);">Run</button></td>
+    </tr>
+    <tr>
+    <th scope="row"> 2.7.4: DNS INFORMATION IN ROUTER ADVERTISEMENT PART B</th>
+    <td>LAN</td>
+    <td><button id="Test274b" type="button" class="badge badge-dark" onclick=" toggleButton(this.id);">Run</button></td>
+    </tr>
+    <tr>
+    <th scope="row"> 2.7.5: PREFIX CHANGE PART A</th>
+    <td>LAN</td>
+    <td><button id="Test275a" type="button" class="badge badge-dark" onclick=" toggleButton(this.id);">Run</button></td>
+    </tr>
+    <tr>
+    <th scope="row"> 2.7.5: PREFIX CHANGE PART B</th>
+    <td>LAN</td>
+    <td><button id="Test275b" type="button" class="badge badge-dark" onclick=" toggleButton(this.id);">Run</button></td>
+    </tr>
+
+    <tr>
+    <th scope="row"> 2.7.5: PREFIX CHANGE PART C</th>
+    <td>LAN</td>
+    <td><button id="Test275c" type="button" class="badge badge-dark" onclick=" toggleButton(this.id);">Run</button></td>
+    </tr>
+    <tr>
+    <th scope="row"> 2.7.5: PREFIX CHANGE PART D</th>
+    <td>LAN</td>
+    <td><button id="Test275d" type="button" class="badge badge-dark" onclick=" toggleButton(this.id);">Run</button></td>
+    </tr>
+    <tr>
+    <th scope="row"> 2.7.6: UNKNOWN PREFIX</th>
+    <td>LAN</td>
+    <td><button id="Test276" type="button" class="badge badge-dark" onclick=" toggleButton(this.id);">Run</button></td>
+    </tr>
+    <tr>
+    <th scope="row"> 2.7.7: UNIQUE LOCAL ADDRESS PREFIX PART A</th>
+    <td>LAN</td>
+    <td><button id="Test277a" type="button" class="badge badge-dark" onclick=" toggleButton(this.id);">Run</button></td>
+    </tr>
+    <tr>
+    <th scope="row"> 2.7.7: UNIQUE LOCAL ADDRESS PREFIX PART B</th>
+    <td>LAN</td>
+    <td><button id="Test277b" type="button" class="badge badge-dark" onclick=" toggleButton(this.id);">Run</button></td>
+    </tr>
+    <tr>
+    <th scope="row"> 2.7.7: UNIQUE LOCAL ADDRESS PREFIX PART C</th>
+    <td>LAN</td>
+    <td><button id="Test277c" type="button" class="badge badge-dark" onclick=" toggleButton(this.id);">Run</button></td>
+    </tr>
+    <tr>
+    <th scope="row"> 3.2.1: IPV6 FORWARDING BEFORE ADDRESS ACQUISITION PART A</th>
+    <td>FORWARDING</td>
+    <td><button id="Test321a" type="button" class="badge badge-dark" onclick=" toggleButton(this.id);">Run</button></td>
+    </tr>
+    <tr>
+    <th scope="row">  3.2.1: IPV6 FORWARDING BEFORE ADDRESS ACQUISITION PART B</th>
+    <td>FORWARDING</td>
+    <td><button id="Test321b" type="button" class="badge badge-dark" onclick=" toggleButton(this.id);">Run</button></td>
+    </tr>
+    <tr>
+    <th scope="row"> 3.2.2: NO DEFAULT ROUTE PART A</th>
+    <td>FORWARDING</td>
+    <td><button id="Test322a" type="button" class="badge badge-dark" onclick=" toggleButton(this.id);">Run</button></td>
+    </tr>
+    <tr>
+    <th scope="row"> 3.2.2: NO DEFAULT ROUTE PART B</th>
+    <td>FORWARDING</td>
+    <td><button id="Test322b" type="button" class="badge badge-dark" onclick=" toggleButton(this.id);">Run</button></td>
+    </tr>
+    <tr>
+    <th scope="row"> 3.2.3: FORWARDING LOOPS PART A</th>
+    <td>FORWARDING</td>
+    <td><button id="Test323a" type="button" class="badge badge-dark" onclick=" toggleButton(this.id);">Run</button></td>
+    </tr>
+    <tr>
+    <th scope="row">  3.2.3: FORWARDING LOOPS PART B</th>
+    <td>FORWARDING</td>
+    <td><button id="Test323b" type="button" class="badge badge-dark" onclick=" toggleButton(this.id);">Run</button></td>
+    </tr>
+    <tr>
+    <th scope="row"> 3.2.4: UNIQUE LOCAL ADDRESS FORWARDING</th>
+    <td>FORWARDING</td>
+    <td><button id="Test324" type="button" class="badge badge-dark" onclick=" toggleButton(this.id);">Run</button></td>
+    </tr>
+
+
+
+
+
+</tbody>
+</table>
+</div>
+
+
+<p id="demo"></p>
+<div id="demo" class="form-group table2">
+<label for="exampleFormControlTextarea1">Log messages WAN</label>
+<textarea   id="demomo" class="form-control" id="exampleFormControlTextarea1" rows="5" readonly></textarea>
+</div>
+<!-- <a href="lan.cap" download>dowload</a> -->
+<div id="demo2" class="form-group table2">
+    <label for="exampleFormControlTextarea1">Log Messages LAN</label>
+    <textarea  id="demolan"  class="form-control" id="exampleFormControlTextarea1" rows="5" readonly></textarea>
+    </div>
+
+
+</main><!-- /.container -->
+<script
+src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous">
+</script>
+
+<script>
+// $("button").click(function() {
+// var test_id =    this.id; // or alert($(this).attr('id'));
+// });
+
+function toggleButton(button_id) 
+{
+  var xhttp = new XMLHttpRequest();
+
+    xhttp.onreadystatechange = function() {
+      if (this.status == 200) {
+        document.getElementById("demomo").innerHTML = this.responseText;
+        document.getElementById(button_id).innerText = "Running";
+        document.getElementById(button_id).className = "badge badge-primary";
+      }else{
+        document.getElementById(button_id).innerText = "Fail";
+        document.getElementById(button_id).className = "badge badge-danger";
+      }
+    };
+      var url = "http://127.0.0.1:5000/active/";
+      var test = button_id;
+      var complete_url = url.concat(test);
+      // alert(complete_url);
+      xhttp.open("GET",complete_url,true);
+      xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+      xhttp.send();
+
+  // var xhttp_lan = new XMLHttpRequest();
+  // xhttp_lan.onreadystatechange = function() {
+  //   if (this.status == 200) {
+  //     document.getElementById("demolan").innerHTML = this.responseText;
+  //   }
+  // };
+  // xhttp_lan.open("GET","http://127.0.0.1:5000/LAN",true);
+  // xhttp_lan.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+  // xhttp_lan.send();
+}
+var test_id = 'None';
+$("button").click(function() {
+  if(test_id == 'None'){
+      test_id = this.id;
+      // alert(test_id);
+    }
+  interval = setInterval(function(){
+    loadDoc();
+
+  },1000);
+})
+  function loadDoc() {
+ 
+    var xhttp = new XMLHttpRequest();
+
+    xhttp.onreadystatechange = function() {
+      if (this.status == 200) {
+        document.getElementById("demomo").innerHTML = this.responseText;
+      }
+    };
+    xhttp.open("GET","http://127.0.0.1:5000/WAN",true);
+    xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+    xhttp.send();
+
+    var xhttp_lan = new XMLHttpRequest();
+    xhttp_lan.onreadystatechange = function() {
+      if (this.status == 200) {
+        if (this.responseText == 'APROVADO'){
+          document.getElementById(test_id).innerText = "Success";
+          document.getElementById(test_id).className = "badge badge-success";
+        }
+        if (this.responseText == 'REPROVADO'){
+          document.getElementById(test_id).innerText = "Disapproved";
+          document.getElementById(test_id).className = "badge badge-danger";
+        }
+        document.getElementById("demolan").innerHTML = this.responseText;
+      }
+    };
+    xhttp_lan.open("GET","http://127.0.0.1:5000/LAN",true);
+    xhttp_lan.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+    xhttp_lan.send();
+
+
+
+
+
+
+  };
+</script>
+
+
+<script>window.jQuery || document.write('<script src="../assets/js/vendor/jquery.slim.min.js"><\/script>')</script><script src="../assets/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>
