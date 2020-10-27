@@ -299,7 +299,9 @@ class Test324:
                             self.__sendmsgs.send_icmp_na_lan(self.__config_setup_lan)
 
                 else: 
-                    self.set_status_lan('LAN: Timeout. TEST 3.2.4: UNIQUE LOCAL ADDRESS FORWARDING....REPROVADO')
+                    self.set_status_lan('Nao foi recebido a mensagem Destino Inalcançável durante a execução do teste')
+                    time.sleep(2)
+                    self.set_status_lan('REPROVADO')
                     logging.info('TEST 3.2.4: UNIQUE LOCAL ADDRESS FORWARDING....REPROVADO')
                     logging.info('Nao foi recebido a mensagem Destino Inalcançável durante a execução do teste')
                     self.__packet_sniffer_wan.stop() 
