@@ -1,4 +1,4 @@
-# RFC 7084 protocol tester
+# RFC 7084 IPv6 protocol tester
 
 This software implement IPv6 tests on routers using the RFC 7084 requirements.
 
