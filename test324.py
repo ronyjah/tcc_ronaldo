@@ -60,9 +60,8 @@ class Test324:
         self.stop_ping_OK = False
         self.ipsrc = None
         self.__app = app
-        self.msg = 'olamundo'
-        self.status = 'inicial'
-        self.msg_lan ='Inicial LAN'
+        self.msg = self.__config.get('tests','3.2.4')
+        self.msg_lan =self.__config.get('tests','3.2.4')
         self.__config_setup_lan = ConfigSetup1_1_Lan(self.__config,self.__lan_device)
 
     def set_flags(self):
@@ -247,7 +246,7 @@ class Test324:
                         self.send_local_na_lan(pkt)
                         
             if self.__config_setup1_1.get_setup1_1_OK():
-                
+                self.set_status_lan('LAN: Setup1.1 concluido. Contador de 300 s iniciado afim de concluir o teste')
                 logging.info('LAN: Setup1.1 concluido. Contador de 300 s iniciado afim de concluir o teste')
                 if pkt[Ether].src == self.__config.get('lan','mac_address'):
                     continue
@@ -260,6 +259,7 @@ class Test324:
                     if pkt.haslayer(ICMPv6ND_RA):
                         if pkt[ICMPv6NDOptPrefixInfo].prefix == self.__config.get('t3.2.4','prefix_ula'):
                                 logging.info('LAN: Recebido prefixo esperado. Inciando tentativa de Pingar um endereco Global')
+                                self.set_status_lan('LAN: Recebido prefixo esperado. Inciando tentativa de Pingar um endereco Global')
                                 self.ping_tn1_ula()
                         else:
                             self.__finish_wan = True
@@ -267,7 +267,9 @@ class Test324:
                             self.__packet_sniffer_wan.stop() 
                             self.__packet_sniffer_lan.stop()
                             self.set_status_lan('Teste 3.2.4 - FALHA. VERIFIQUE O PREFIXO ULA CONFIGURADO NO ROTEADOR')
+                            time.sleep(2)
                             logging.info('Teste 3.2.4 - FALHA. VERIFIQUE O PREFIXO ULA CONFIGURADO NO ROTEADOR')
+                            self.set_status_lan('REPROVADO')
                             print(pkt[ICMPv6NDOptPrefixInfo].prefix)
                             return False   
      
@@ -302,6 +304,7 @@ class Test324:
                     self.set_status_lan('Nao foi recebido a mensagem Destino Inalcançável durante a execução do teste')
                     time.sleep(2)
                     self.set_status_lan('REPROVADO')
+
                     logging.info('TEST 3.2.4: UNIQUE LOCAL ADDRESS FORWARDING....REPROVADO')
                     logging.info('Nao foi recebido a mensagem Destino Inalcançável durante a execução do teste')
                     self.__packet_sniffer_wan.stop() 
@@ -309,20 +312,6 @@ class Test324:
                     self.__finish_wan = True 
                     self.__fail_test = False
                     return False    
-
-
-    # @app.before_request
-    # def before_request_func():
-    #         with app.app_context():
-    #             g.var = self.msg
-
-
-    # def generate_report(self):
-    #     format = request.args.get('format')
-
-
-
-
 
     def set_status(self,v):
         self.msg = v

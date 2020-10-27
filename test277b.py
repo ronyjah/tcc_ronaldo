@@ -21,6 +21,7 @@ logging.basicConfig(format=format, level=logging.DEBUG,
 class Test277b:
 
     def __init__(self,config,app):
+        self.__app = app
         self.__queue_wan = Queue()
         self.__queue_lan = Queue()
         self.__config = config
@@ -39,6 +40,8 @@ class Test277b:
         self.__t_lan = None
         self.__finish_wan = False
         self.__dhcp_renew_done = False
+        self.msg_lan = self.__config.get('tests','2.7.7b')
+        self.msg = self.__config.get('tests','2.7.7b')
         self.__config_setup_lan = ConfigSetup1_1_Lan(self.__config,self.__lan_device)
 
 
@@ -72,9 +75,21 @@ class Test277b:
         self.__config_setup_lan.set_client_duid(self.__config.get('solicitlan','duid'))
         self.__config_setup_lan.set_iaid(self.__config.get('solicitlan','iaid'))
 
+    def set_status_lan(self,v):
+        self.msg_lan = v
+
+    def get_status_lan(self):
+        return self.msg_lan
+
+
+    def set_status(self,v):
+        self.msg = v
+
+    def get_status(self):
+        return self.msg
         
     def run_Lan(self):
-        logging.info('Thread da LAN inicio')
+
         t_test = 0
         t_test1= 0
         sent_reconfigure = False
@@ -82,24 +97,26 @@ class Test277b:
         send_ra = False
         send_na_lan = False
         self.set_flags_lan()
+        cache_lan = []
         self.__config_setup_lan.set_setup_lan_start()
+
+        @self.__app.route("/LAN",methods=['GET'])
+        def envia_lan():
+            return self.get_status_lan()
+
         while not self.__queue_lan.full():
             while self.__queue_lan.empty():
-                
-                logging.info('Thread da LAN time')
+
                 time.sleep(1)
                 
                 if self.__config_setup1_1.get_setup1_1_OK():
-                    logging.info('Thread da WAN DONE')
-#                    t_test = t_test + 1
- #                   if self.__config_setup1_1.get_recvd_dhcp_renew():
-                #pkt = self.__queue_lan.get()
+
                     if t_test < 80:
                         time.sleep(1)
                         t_test = t_test + 1
                         if t_test % 5 ==0:
-                            print('ENVIO RS - 1 LAN')
-                            #self.__config_setup_lan.set_setup_lan_start()
+
+                            self.set_status_lan('LAN: Transmissão periódica de ICMP RS')
                             self.__config_setup_lan.set_ipv6_src(self.__config.get('lan','lan_local_addr'))
                             self.__config_setup_lan.set_ether_src(self.__config.get('lan','mac_address'))
                             self.__config_setup_lan.set_ether_dst(self.__config.get('multicast','all_mac_routers'))
@@ -109,7 +126,7 @@ class Test277b:
 
                         
                             if self.__config_setup_lan.get_ND_global_OK() and not self.__config_setup_lan.get_global_ping_OK():
-                                print('ENVIO REQUEST 1 LAN')
+                                #print('ENVIO REQUEST 1 LAN')
                                 mac_global = self.__config_setup_lan.get_global_mac_ceRouter()
                                 ip_global = self.__config_setup_lan.get_global_addr_ceRouter()
                                 self.__config_setup_lan.set_ipv6_src(self.__config.get('lan','global_wan_addr'))
@@ -120,7 +137,7 @@ class Test277b:
 
 
                             #self.__config_setup_lan.set_setup_lan_start()
-                            print('PRINT ENVIO INFORMATION LAN')
+                            #print('#print ENVIO INFORMATION LAN')
                             self.__config_setup_lan.set_ipv6_src(self.__config.get('lan','lan_local_addr'))
                             self.__config_setup_lan.set_ether_src(self.__config.get('lan','mac_address'))
                             self.__config_setup_lan.set_ether_dst(self.__config.get('multicast','all_mac_routers'))
@@ -133,8 +150,10 @@ class Test277b:
                     else: time_over = True
 
             pkt = self.__queue_lan.get()
+            cache_lan.append(pkt)
+            wrpcap("lan-2.7.7b.cap",cache_lan)
             if not self.__config_setup_lan.get_global_ping_OK():
-                print('LOOP PRINCIPAL')
+                #print('LOOP PRINCIPAL')
                 if not self.__config_setup_lan.get_disapproved():
                     self.__config_setup_lan.run_setup1_1(pkt)
                 else:
@@ -143,8 +162,6 @@ class Test277b:
                     self.__finish_wan = True 
                     return False       
             else:
-
-
                 if t_test1 < 60:
                     time.sleep(1)
                     t_test1 = t_test1 + 1
@@ -155,11 +172,15 @@ class Test277b:
                             if self.__prefixaddr_ula_CeRouter == self.__config.get('t2.7.7b','prefix_ula'):
                                 logging.info(' Teste 2.7.7b: Recebido o prefix ULA esperado.')
                                 logging.info('Aprovado Teste2.7.7b.')
+                                self.set_status_lan('APROVADO')
                                 self.__packet_sniffer_lan.stop()
                                 self.__finish_wan = True
                                 self.__fail_test = False 
                                 return True  
                 else:
+                    self.set_status('WAN: Reprovado. CeRouter Enviou Prefix ULA durante o tempo de teste')
+                    time.sleep(2)
+                    self.set_status_lan('REPROVADO')
                     logging.info(' Teste2.7.7b: Prefix ULA Não recebido no tempo de teste')
                     #logging.info(routerlifetime)
                     self.__packet_sniffer_lan.stop()
@@ -167,20 +188,21 @@ class Test277b:
                     self.__fail_test = True
                     return False
 
-
-
                 
     def run(self):
+        self.set_status('Ative a ULA com prefixo: ' +  self.__config.get('t2.7.7b','prefix_ula') + ' . Reinicie o Roteador')
 
+        @self.__app.route("/WAN",methods=['GET'])
+        def enviawan():
+            return self.get_status()
         
         self.set_flags()
         logging.info(self.__test_desc)
         logging.info('==========================================================================')
-        logging.info('Ative a ULA com prefixo: ' +  self.__config.get('t2.7.7b','prefix_ula' + 'e reinicie o Roteador')) 
+        logging.info('Ative a ULA com prefixo: ' +  self.__config.get('t2.7.7b','prefix_ula') + ' . Reinicie o Roteador') 
         logging.info('==========================================================================')
-
         
-        time.sleep(20)
+        time.sleep(10)
         self.__t_lan =  Thread(target=self.run_Lan,name='LAN_Thread')
         self.__t_lan.start()
         
@@ -189,82 +211,52 @@ class Test277b:
         
         self.__packet_sniffer_lan = PacketSniffer('Test273b-LAN',self.__queue_lan,self,self.__config,self.__lan_device)
         test_lan = self.__packet_sniffer_lan.start()
+        cache_wan = []
 
 
         t_test = 0
         sent_reconfigure = False
         time_over = False
-        #time.sleep(11111)
+        cache_wan = []
         finish_wan = True
         self.__config_setup1_1.set_pd_prefixlen(self.__config.get('t2.7.7b','pd_prefixlen')) 
         self.__config_setup1_1.set_routerlifetime(self.__config.get('t2.7.7b','routerlifetime')) 
-        #self.__config_setup1_1.active_DHCP_no_IA_PD()
+
+
         while not self.__queue_wan.full():
             while self.__queue_wan.empty():
                 if t_test < 60:
                     time.sleep(1)
+                    t_test = t_test + 1
                     if t_test % 15 ==0:
-                        
+                        self.set_status('WAN: Envio periódico de RA a cada 15 seg durante 60 seg.')
+
                         self.__config_setup1_1.set_ether_src(self.__config.get('wan','ra_mac'))
                         self.__config_setup1_1.set_ether_dst(self.__config.get('multicast','all_mac_nodes'))
                         self.__config_setup1_1.set_ipv6_src(self.__config.get('wan','ra_address'))
                         self.__config_setup1_1.set_ipv6_dst(self.__config.get('multicast','all_nodes_addr'))
                         self.__sendmsgs.send_tr1_RA(self.__config_setup1_1)
-                    t_test = t_test + 1
+
                 else:
                     time_over = True
             pkt = self.__queue_wan.get()
-
+            cache_wan.append(pkt)
+            wrpcap("WAN-2.7.7b.cap",cache_wan)
             if not self.__config_setup1_1.get_setup1_1_OK():
-
+                self.set_status('WAN: Setup 1.1 em execução.')
                 if not self.__config_setup1_1.get_disapproved():
                     self.__config_setup1_1.run_setup1_1(pkt)
                 else:
+                    self.set_status('WAN: Reprovado. CeRouter não completou setup 1.1')
+                    time.sleep(2)
+                    self.set_status('REPROVADO')
                     logging.info('Reprovado Teste 2.7.3a - Falha em completar o Common Setup 1.1 da RFC')
                     self.__packet_sniffer_wan.stop() 
                     return False
 
             else:
-                if not self.__finish_wan: 
-                    print('WAN - Concluido')
-                    print('LAN RESULT')
-    #                 if not sent_reconfigure:
-    #                     time.sleep(25)
-    #                     print('aqui7')
-    #                     self.__config_setup1_1.set_ipv6_src(self.__config.get('wan','link_local_addr'))
-    #                     print('aqui8')
-    #                     self.__config_setup1_1.set_ipv6_dst(self.__config_setup1_1.get_local_addr_ceRouter())
-    #                     print('aqui10')
-    #                     self.__config_setup1_1.set_ether_src(self.__config.get('wan','link_local_mac'))
-    #                     print('aqui11')
-    #                     self.__config_setup1_1.set_ether_dst(self.__config_setup1_1.get_mac_ceRouter())
-    #                     print('aqui12')
-    #                     self.__config_setup1_1.set_dhcp_reconf_type(self.__config.get('t1.6.3','msg_type'))
-    #                     print('aqui13')
-    #                     self.__config_setup1_1.set_udp_sport('547')
-    #                     self.__config_setup1_1.set_udp_dport('546')
-    #                     self.__sendmsgs.send_dhcp_reconfigure(self.__config_setup1_1)
-    #                     print('aqui14')
-    #                     sent_reconfigure = True 
-                        
-
-    #                 if pkt.haslayer(DHCP6_Renew):
-    #                     if not self.__dhcp_renew_done:
-    # #                        if self.__active_renew_dhcp:
-    #                         self.__config_setup1_1.set_mac_ceRouter(pkt[Ether].src)
-    #                         self.__config_setup1_1.set_local_addr_ceRouter(pkt[IPv6].src)
-    #                         self.__config_setup1_1.set_xid(pkt[DHCP6_Renew].trid)
-    #                         self.__config_setup1_1.set_ipv6_src(self.__config.get('wan','link_local_addr'))
-    #                         self.__config_setup1_1.set_ipv6_dst(pkt[IPv6].src)
-    #                         self.__config_setup1_1.set_ether_src(self.__config.get('wan','link_local_mac'))
-    #                         self.__config_setup1_1.set_ether_dst(pkt[Ether].src)
-    #                         self.__config_setup1_1.set_dhcp_preflft('100')
-    #                         self.__config_setup1_1.set_dhcp_validlft('200')
-    #                         self.__config_setup1_1.set_dhcp_plen('60')
-    #                         self.__config_setup1_1.set_prefix_addr(self.__config.get('setup1-1_advertise','ia_pd_address'))
-    #                         self.__sendmsgs.send_dhcp_reply_v3(self.__config_setup1_1)
-    #                         #self.__dhcp_ok = True
-    #                         self.__dhcp_renew_done = True
+                if not self.__finish_wan:
+                    pass
                 else:
                     self.__packet_sniffer_wan.stop()
                     if self.__fail_test:

@@ -21,6 +21,7 @@ logging.basicConfig(format=format, level=logging.DEBUG,
 class Test275d:
 
     def __init__(self,config,app):
+        self.__app = app
         self.__queue_wan = Queue()
         self.__queue_lan = Queue()
         self.__config = config
@@ -39,6 +40,8 @@ class Test275d:
         self.__t_lan = None
         self.__finish_wan = False
         self.__dhcp_renew_done = False
+        self.msg = self.__config.get('tests','2.7.5d')
+        self.msg_lan =self.__config.get('tests','2.7.5d')
         self.__config_setup_lan = ConfigSetup1_1_Lan(self.__config,self.__lan_device)
 
 
@@ -71,9 +74,24 @@ class Test275d:
         self.__config_setup_lan.set_enterprise(self.__config.get('solicitlan','enterpriseid'))
         self.__config_setup_lan.set_client_duid(self.__config.get('solicitlan','duid'))
         self.__config_setup_lan.set_iaid(self.__config.get('solicitlan','iaid'))
+    def set_status_lan(self,v):
+        self.msg_lan = v
+
+    def get_status_lan(self):
+        return self.msg_lan
+
+
+    def set_status(self,v):
+        self.msg = v
+
+    def get_status(self):
+        return self.msg
 
         
     def run_Lan(self):
+        @self.__app.route("/LAN",methods=['GET'])
+        def envia_lan():
+            return self.get_status_lan()
         #self.__config_setup_lan_.flags_partA()
         logging.info('Thread da LAN inicio')
         t_test = 0
@@ -83,6 +101,7 @@ class Test275d:
         send_ra = False
         self.set_flags_lan()
         self.__config_setup_lan.set_setup_lan_start()
+        cache_lan = []
         while not self.__queue_lan.full():
             while self.__queue_lan.empty():
                 
@@ -131,6 +150,8 @@ class Test275d:
                             time_over = True
 
             pkt = self.__queue_lan.get()
+            cache_lan.append(pkt)
+            wrpcap("lan-2.7.5d.cap",cache_lan)
             if not self.__config_setup_lan.get_global_ping_OK():
                 if not self.__config_setup_lan.get_disapproved():
                     self.__config_setup_lan.run_setup1_1(pkt)
@@ -179,6 +200,9 @@ class Test275d:
 
                 
     def run(self):
+        @self.__app.route("/WAN",methods=['GET'])
+        def enviawan():
+            return self.get_status()
         self.__t_lan =  Thread(target=self.run_Lan,name='LAN_Thread')
         self.__t_lan.start()
         
@@ -187,7 +211,7 @@ class Test275d:
         
         self.__packet_sniffer_lan = PacketSniffer('Test273b-LAN',self.__queue_lan,self,self.__config,self.__lan_device)
         test_lan = self.__packet_sniffer_lan.start()
-        
+        cache_wan = []
         self.set_flags()
         logging.info(self.__test_desc)
         t_test = 0
@@ -213,7 +237,8 @@ class Test275d:
                 else:
                     time_over = True
             pkt = self.__queue_wan.get()
-
+            cache_wan.append(pkt)
+            wrpcap("WAN-2.7.5d.cap",cache_wan)
             if not self.__config_setup1_1.get_setup1_1_OK():
 
                 if not self.__config_setup1_1.get_disapproved():

@@ -21,6 +21,7 @@ logging.basicConfig(format=format, level=logging.DEBUG,
 class Test323a:
 
     def __init__(self,config,app):
+        self.__app = app
         self.__queue_wan = Queue()
         self.__queue_lan = Queue()
         self.__config = config
@@ -41,6 +42,8 @@ class Test323a:
         self.part2_lan_start = False
         self.__dhcp_renew_done = False
         self.stop_ping_OK = False
+        self.msg = self.__config.get('tests','3.2.3a')
+        self.msg_lan =self.__config.get('tests','3.2.3a')
         self.__config_setup_lan = ConfigSetup1_1_Lan(self.__config,self.__lan_device)
 
 
@@ -87,7 +90,21 @@ class Test323a:
             self.__config_setup_lan.set_ether_dst(self.__config_setup_lan.get_mac_ceRouter())
             self.__config_setup_lan.set_ipv6_dst(self.__config.get('t3.2.3a','tn3_ip'))
             self.__sendmsgs.send_echo_request_lan(self.__config_setup_lan)
-        
+
+    def set_status_lan(self,v):
+        self.msg_lan = v
+
+    def get_status_lan(self):
+        return self.msg_lan
+
+
+    def set_status(self,v):
+        self.msg = v
+
+    def get_status(self):
+        return self.msg
+
+
     def run_Lan(self):
 
         t_test = 0
@@ -100,6 +117,10 @@ class Test323a:
         reset_test1 = False
         self.set_flags_lan()
         self.__config_setup_lan.set_setup_lan_start()
+        cache_lan = []
+        @self.__app.route("/LAN",methods=['GET'])
+        def envia_lan():
+            return self.get_status_lan()
         while not self.__queue_lan.full():
             if self.__queue_lan.empty():
                 if t_test < 30:
@@ -133,7 +154,8 @@ class Test323a:
             else:
 
                 pkt = self.__queue_lan.get()
-
+                cache_lan.append(pkt)
+                wrpcap("lan-3.2.3.cap",cache_lan)
                 if pkt.haslayer(ICMPv6ND_RA):
                     self.__config_setup_lan.set_mac_ceRouter(pkt[Ether].src)
 
@@ -266,7 +288,9 @@ class Test323a:
     def run(self):
         #self.__t_lan =  Thread(target=self.run_Lan,name='LAN_Thread')
         #self.__t_lan.start()
-        
+        @self.__app.route("/WAN",methods=['GET'])
+        def enviawan():
+            return self.get_status()        
         self.__packet_sniffer_wan = PacketSniffer('Test273b-WAN',self.__queue_wan,self,self.__config,self.__wan_device_tr1)
         self.__packet_sniffer_wan.start()
         
@@ -282,6 +306,7 @@ class Test323a:
         start_time_count = False
         finish_wan = False
         part1_OK = False
+        cache_wan = []
         self.__config_setup1_1.set_pd_prefixlen(self.__config.get('t3.2.3a','pd_prefixlen')) 
         self.__config_setup1_1.set_routerlifetime(self.__config.get('t3.2.3a','routerlifetime')) 
         while not self.__queue_wan.full():
@@ -306,7 +331,8 @@ class Test323a:
                     time_over = True      
             else:
                 pkt = self.__queue_wan.get()
-
+                cache_wan.append(pkt)
+                wrpcap("WAN-3.2.4.cap",cache_wan)
                 if not self.__config_setup1_1.get_ND_local_OK():
 
                     if pkt[Ether].src == self.__config.get('wan','link_local_mac'):

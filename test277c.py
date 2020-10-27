@@ -14,6 +14,8 @@ from commontestsetup1_1 import CommonTestSetup1_1
 from sendmsgs import SendMsgs
 from configsetup1_1 import ConfigSetup1_1
 from configsetup1_1_lan import ConfigSetup1_1_Lan
+from flask import Flask,send_file,g,current_app,session
+
 format = "%(asctime)s: %(message)s"
 logging.basicConfig(format=format, level=logging.DEBUG,
                     datefmt="%H:%M:%S")
@@ -21,6 +23,7 @@ logging.basicConfig(format=format, level=logging.DEBUG,
 class Test277c:
 
     def __init__(self,config,app):
+        self.__app = app
         self.__queue_wan = Queue()
         self.__queue_lan = Queue()
         self.__config = config
@@ -39,6 +42,9 @@ class Test277c:
         self.__t_lan = None
         self.__finish_wan = False
         self.__dhcp_renew_done = False
+        self.msg = self.__config.get('tests','2.7.7c')
+
+        self.msg_lan =self.__config.get('tests','2.7.7c')
         self.__config_setup_lan = ConfigSetup1_1_Lan(self.__config,self.__lan_device)
 
 
@@ -71,6 +77,17 @@ class Test277c:
         self.__config_setup_lan.set_enterprise(self.__config.get('solicitlan','enterpriseid'))
         self.__config_setup_lan.set_client_duid(self.__config.get('solicitlan','duid'))
         self.__config_setup_lan.set_iaid(self.__config.get('solicitlan','iaid'))
+    def set_status(self,v):
+        self.msg = v
+
+    def get_status(self):
+        return self.msg
+
+    def set_status_lan(self,v):
+        self.msg_lan = v
+
+    def get_status_lan(self):
+        return self.msg_lan   
 
         
     def run_Lan(self):
@@ -82,66 +99,101 @@ class Test277c:
         time_over = False
         send_ra = False
         send_na_lan = False
+        cache_lan = []
         self.set_flags_lan()
         self.__config_setup_lan.set_setup_lan_start()
+
+        @self.__app.route("/LAN",methods=['GET'])
+        def envia_lan():
+            return self.get_status_lan()
+
         while not self.__queue_lan.full():
             while self.__queue_lan.empty():
                 if t_test1 < 120:
                     time.sleep(1)
                     t_test1 = t_test1 + 1
-                    if pkt.haslayer(ICMPv6ND_RA):
-                        self.__routerlifetime_CeRouter = pkt[ICMPv6ND_RA].routerlifetime
-                        if pkt.haslayer(ICMPv6NDOptPrefixInfo):
-                            self.__prefixaddr_ula_CeRouter = pkt[ICMPv6NDOptPrefixInfo].prefix
-                            if self.__prefixaddr_ula_CeRouter == self.__config.get('t2.7.7c','prefix_ula'):
-                                logging.info(' Teste 2.7.7c: Recebido o prefix ULA esperado.')
-                                logging.info('Aprovado Teste2.7.7c.')
-                                self.__packet_sniffer_lan.stop()
-                                self.__finish_wan = True
-                                self.__fail_test = False 
-                                return True  
-                else:
-                    logging.info(' Teste2.7.7c: Prefix ULA Não recebido no tempo de teste')
-                    #logging.info(routerlifetime)
-                    self.__packet_sniffer_lan.stop()
-                    self.__finish_wan = True 
-                    self.__fail_test = True
-                    return False
+            pkt = self.__queue_lan.get()
+            cache_lan.append(pkt)
+            wrpcap("lan-2.7.7c.cap",cache_lan)
+            if pkt.haslayer(ICMPv6ND_RA):
+                self.__routerlifetime_CeRouter = pkt[ICMPv6ND_RA].routerlifetime
+                if pkt.haslayer(ICMPv6NDOptPrefixInfo):
+                    self.__prefixaddr_ula_CeRouter = pkt[ICMPv6NDOptPrefixInfo].prefix
+                    if self.__prefixaddr_ula_CeRouter == self.__config.get('t2.7.7c','prefix_ula'):
+                        logging.info(' Teste 2.7.7c: Recebido o prefix ULA esperado.')
+                        logging.info('Aprovado Teste2.7.7c.')
+                        time.sleep(2)
+                        self.set_status('APROVADO')
+                        self.__finish_wan = True
+                        self.__fail_test = False 
+                        return True  
+        else:
+            logging.info(' Teste2.7.7c: Prefix ULA Não recebido durante o tempo de teste')
+            self.set_status('REPROVADO')
+            #logging.info(routerlifetime)
+            self.__finish_wan = True 
+            self.__fail_test = True
+            return False
                 
     def run(self):
+        self.set_status('Ative a ULA com prefixo: ' +  self.__config.get('t2.7.7c','prefix_ula') + 'e reinicie o Roteador')
 
-        
+        @self.__app.route("/WAN",methods=['GET'])
+        def enviawan():
+            return self.get_status()
+        cache_wan = []
         self.set_flags()
         logging.info(self.__test_desc)
         logging.info('==================================================================================')
         logging.info('Ative a ULA com prefixo: ' +  self.__config.get('t2.7.7c','prefix_ula') + 'e reinicie o Roteador') 
         logging.info('==================================================================================')
-
         
-        time.sleep(20)
+        time.sleep(10)
         self.__t_lan =  Thread(target=self.run_Lan,name='LAN_Thread')
         self.__t_lan.start()
         
-        #self.__packet_sniffer_wan = PacketSniffer('Test273b-WAN',self.__queue_wan,self,self.__config,self.__wan_device_tr1)
-        #self.__packet_sniffer_wan.start()
+        self.__packet_sniffer_wan = PacketSniffer('Test273b-WAN',self.__queue_wan,self,self.__config,self.__wan_device_tr1)
+        self.__packet_sniffer_wan.start()
         
-        self.__packet_sniffer_lan = PacketSniffer('Test273b-LAN',self.__queue_lan,self,self.__config,self.__lan_device)
+        self.__packet_sniffer_lan = PacketSniffer('Test277c-LAN',self.__queue_lan,self,self.__config,self.__lan_device)
         test_lan = self.__packet_sniffer_lan.start()
+        cache_wan = []
 
+
+        t_test = 0
 
 
         while not self.__queue_wan.full():
-
-            if not self.__finish_wan: 
-                print('WAN - Concluido')
-                print('LAN RESULT')
-            else:
-                self.__packet_sniffer_wan.stop()
-                if self.__fail_test:
-                    return False
+            if self.__queue_wan.empty():
+                self.set_status('Temporizador do teste: 300 segundos')
+                if t_test <= 300:
+                    time.sleep(1)
+                    t_test = t_test + 1
                 else:
-                    return True
-            self.__packet_sniffer_wan.stop()
+                    self.__packet_sniffer_wan.stop() 
+                    self.__packet_sniffer_lan.stop()
+                    self.set_status('Timeout')
+                    logging.info('WAN: Timeout')
+                    time.sleep(2)
+                    self.set_status('REPROVADO')
+                    time_over = True 
+            else:
+
+                pkt = self.__queue_wan.get()
+                cache_wan.append(pkt)
+                wrpcap("WAN-2.7.7c.cap",cache_wan)
+                if not self.__finish_wan:
+                    pass 
+                else:
+                    self.__packet_sniffer_wan.stop() 
+                    self.__packet_sniffer_lan.stop()
+                    time_over = True 
+    
+                    if self.__fail_test:
+                        return False
+                    else:
+                        return True
+        self.__packet_sniffer_wan.stop()
         return False
      
         

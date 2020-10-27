@@ -22,6 +22,7 @@ logging.basicConfig(format=format, level=logging.DEBUG,
 class Test163b:
 
     def __init__(self,config,app):
+        self.__app = app
         self.__queue_wan = Queue()
         self.__queue_lan = Queue()
         self.__config = config

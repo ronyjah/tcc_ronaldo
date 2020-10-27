@@ -21,6 +21,7 @@ logging.basicConfig(format=format, level=logging.DEBUG,
 class Test321a:
 
     def __init__(self,config,app):
+        self.__app = app
         self.__queue_wan = Queue()
         self.__queue_lan = Queue()
         self.__config = config
@@ -39,6 +40,8 @@ class Test321a:
         self.__t_lan = None
         self.__finish_wan = False
         self.__dhcp_renew_done = False
+        self.msg = self.__config.get('tests','3.2.1a')
+        self.msg_lan =self.__config.get('tests','3.2.1a')
         self.__config_setup_lan = ConfigSetup1_1_Lan(self.__config,self.__lan_device)
 
 
@@ -74,6 +77,18 @@ class Test321a:
         self.__config_setup_lan.set_client_duid(self.__config.get('solicitlan','duid'))
         self.__config_setup_lan.set_iaid(self.__config.get('solicitlan','iaid'))
 
+    def set_status_lan(self,v):
+        self.msg_lan = v
+
+    def get_status_lan(self):
+        return self.msg_lan
+
+
+    def set_status(self,v):
+        self.msg = v
+
+    def get_status(self):
+        return self.msg
 
         
     def run_Lan(self):
@@ -88,6 +103,10 @@ class Test321a:
         send_na_lan = False
         self.set_flags_lan()
         self.__config_setup_lan.set_setup_lan_start()
+        @self.__app.route("/LAN",methods=['GET'])
+        cache_lan = []
+        def envia_lan():
+            return self.get_status_lan()
         while not self.__queue_lan.full():
             if self.__queue_lan.empty():
                 if t_test < 60:
@@ -133,7 +152,8 @@ class Test321a:
             else:
 
                 pkt = self.__queue_lan.get()
-
+                cache_wan.append(pkt)
+                wrpcap("WAN-3.2.1a.cap",cache_wan)
                 if not time_over:
                     if pkt.haslayer(ICMPv6EchoReply):
 
@@ -211,6 +231,9 @@ class Test321a:
                             self.__sendmsgs.send_icmp_na_lan(self.__config_setup_lan)
 
     def run(self):
+        @self.__app.route("/WAN",methods=['GET'])
+        def enviawan():
+            return self.get_status()
         self.__t_lan =  Thread(target=self.run_Lan,name='LAN_Thread')
         self.__t_lan.start()
         
@@ -225,6 +248,7 @@ class Test321a:
         t_test = 0
         sent_reconfigure = False
         time_over = False
+        cache_wan = []
 
         finish_wan = True
         self.__config_setup1_1.set_pd_prefixlen(self.__config.get('t3.2.1a','pd_prefixlen')) 
@@ -249,7 +273,8 @@ class Test321a:
                     time_over = True      
             else:
                 pkt = self.__queue_wan.get()
-                logging.info(' TEM PACOTE')
+                cache_wan.append(pkt)
+                wrpcap("WAN-3.2.1a.cap",cache_wan)
 
                 if pkt.haslayer(ICMPv6ND_RS):
                     if pkt[Ether].src == self.__config.get('wan','link_local_mac'):

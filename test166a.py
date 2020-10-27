@@ -21,6 +21,7 @@ logging.basicConfig(format=format, level=logging.DEBUG,
 class Test166a:
 
     def __init__(self,config,app):
+        self.__app = app
         self.__queue_wan = Queue()
         self.__queue_lan = Queue()
         self.__config = config
@@ -71,6 +72,7 @@ class Test166a:
         send_ra = False
         send_ns =False
         send_ra2 = False
+        cache_wan = []
         while not self.__queue_wan.full():
             while self.__queue_wan.empty():
                 if t_test < 60:

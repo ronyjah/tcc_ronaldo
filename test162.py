@@ -27,6 +27,7 @@ logging.basicConfig(format=format, level=logging.DEBUG,
 class Test162a:
 
     def __init__(self,config,app):
+        self.__app = app
         self.__queue_wan = Queue()
         self.__queue_lan = Queue()
         logging.info('self.__queue_size_inicio162')
