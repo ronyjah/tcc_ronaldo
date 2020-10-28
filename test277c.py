@@ -112,28 +112,36 @@ class Test277c:
                 if t_test1 < 120:
                     time.sleep(1)
                     t_test1 = t_test1 + 1
+
+                else:
+                    self.set_status_lan('Reprovado Teste 2.7.7c - Prefix ULA Não recebido durante o tempo de teste')
+                    time.sleep(2)
+                    self.set_status_lan('REPROVADO') # Mensagem padrão para o frontEnd atualizar Status
+                    logging.info(' Reprovado Teste2.7.7c: Prefix ULA Não recebido durante o tempo de teste')
+                    #logging.info(routerlifetime)
+                    self.__finish_wan = True 
+                    self.__fail_test = True
+                    return False
             pkt = self.__queue_lan.get()
             cache_lan.append(pkt)
             wrpcap("lan-2.7.7c.cap",cache_lan)
             if pkt.haslayer(ICMPv6ND_RA):
+                self.set_status_lan('LAN: RA recebido. Verificando o Prefixo ULA')
+                logging.info('LAN: RA recebido. Verificando o Prefixo ULA')
+
                 self.__routerlifetime_CeRouter = pkt[ICMPv6ND_RA].routerlifetime
                 if pkt.haslayer(ICMPv6NDOptPrefixInfo):
                     self.__prefixaddr_ula_CeRouter = pkt[ICMPv6NDOptPrefixInfo].prefix
                     if self.__prefixaddr_ula_CeRouter == self.__config.get('t2.7.7c','prefix_ula'):
-                        logging.info(' Teste 2.7.7c: Recebido o prefix ULA esperado.')
-                        logging.info('Aprovado Teste2.7.7c.')
+
+                        self.set_status('Teste 2.7.7c - APROVADO. Recebido o prefix ULA esperado.')
                         time.sleep(2)
-                        self.set_status('APROVADO')
+                        self.set_status('APROVADO') # Mensagem padrão para o frontEnd atualizar Status
+                        logging.info(' APROVADO Teste 2.7.7c: Recebido o prefix ULA esperado.')
                         self.__finish_wan = True
                         self.__fail_test = False 
                         return True  
-        else:
-            logging.info(' Teste2.7.7c: Prefix ULA Não recebido durante o tempo de teste')
-            self.set_status('REPROVADO')
-            #logging.info(routerlifetime)
-            self.__finish_wan = True 
-            self.__fail_test = True
-            return False
+
                 
     def run(self):
         self.set_status('Ative a ULA com prefixo: ' +  self.__config.get('t2.7.7c','prefix_ula') + 'e reinicie o Roteador')

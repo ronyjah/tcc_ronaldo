@@ -116,7 +116,7 @@ class Test277b:
                         t_test = t_test + 1
                         if t_test % 5 ==0:
 
-                            self.set_status_lan('LAN: Transmissão periódica de ICMP RS')
+                            self.set_status_lan('LAN: Transmissão periódica de ICMP RS e DHCP information')
                             self.__config_setup_lan.set_ipv6_src(self.__config.get('lan','lan_local_addr'))
                             self.__config_setup_lan.set_ether_src(self.__config.get('lan','mac_address'))
                             self.__config_setup_lan.set_ether_dst(self.__config.get('multicast','all_mac_routers'))
@@ -127,6 +127,7 @@ class Test277b:
                         
                             if self.__config_setup_lan.get_ND_global_OK() and not self.__config_setup_lan.get_global_ping_OK():
                                 #print('ENVIO REQUEST 1 LAN')
+                                self.set_status_lan('LAN: Transmissão Echo Request')
                                 mac_global = self.__config_setup_lan.get_global_mac_ceRouter()
                                 ip_global = self.__config_setup_lan.get_global_addr_ceRouter()
                                 self.__config_setup_lan.set_ipv6_src(self.__config.get('lan','global_wan_addr'))
@@ -153,11 +154,18 @@ class Test277b:
             cache_lan.append(pkt)
             wrpcap("lan-2.7.7b.cap",cache_lan)
             if not self.__config_setup_lan.get_global_ping_OK():
+                self.set_status('WAN: Setup 1.1 em execução')
+                logging.info('WAN: Setup 1.1 em execução')
+
                 #print('LOOP PRINCIPAL')
                 if not self.__config_setup_lan.get_disapproved():
                     self.__config_setup_lan.run_setup1_1(pkt)
                 else:
-                    logging.info('Reprovado Teste 2.7.7b - Falha em completar o Common Setup 1.1 da RFC')
+                    logging.info('LAN: Reprovado Teste 2.7.7b - Falha em completar o setup 1.1')
+                    self.set_status_lan('Reprovado Teste 2.7.7b - Falha em completar o setup 1.1')
+                    time.sleep(2)
+                    self.set_status_lan('REPROVADO') # Mensagem padrão para o frontEnd atualizar Status
+
                     self.__packet_sniffer_lan.stop()
                     self.__finish_wan = True 
                     return False       
@@ -166,13 +174,19 @@ class Test277b:
                     time.sleep(1)
                     t_test1 = t_test1 + 1
                     if pkt.haslayer(ICMPv6ND_RA):
+
+
                         self.__routerlifetime_CeRouter = pkt[ICMPv6ND_RA].routerlifetime
                         if pkt.haslayer(ICMPv6NDOptPrefixInfo):
+                            self.set_status_lan('LAN: RA recebido. Verificando o Prefixo ULA')
+                            logging.info('LAN: RA recebido. Verificando o Prefixo ULA')
                             self.__prefixaddr_ula_CeRouter = pkt[ICMPv6NDOptPrefixInfo].prefix
                             if self.__prefixaddr_ula_CeRouter == self.__config.get('t2.7.7b','prefix_ula'):
-                                logging.info(' Teste 2.7.7b: Recebido o prefix ULA esperado.')
-                                logging.info('Aprovado Teste2.7.7b.')
-                                self.set_status_lan('APROVADO')
+                                self.set_status('Teste 2.7.7b - APROVADO. Recebido o prefix ULA esperado.')
+                                time.sleep(2)
+                                self.set_status('APROVADO') # Mensagem padrão para o frontEnd atualizar Status
+                                logging.info(' APROVADO Teste 2.7.7b: Recebido o prefix ULA esperado.')
+
                                 self.__packet_sniffer_lan.stop()
                                 self.__finish_wan = True
                                 self.__fail_test = False 

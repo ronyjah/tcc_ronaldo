@@ -92,7 +92,49 @@ class Test322b:
     def get_status(self):
         return self.msg
 
+    def rourter_advertise(self):
+        self.__config_setup1_1.set_ether_src(self.__config.get('wan','ra_mac'))
+        self.__config_setup1_1.set_ether_dst(self.__config.get('multicast','all_mac_nodes'))
+        self.__config_setup1_1.set_ipv6_src(self.__config.get('wan','ra_address'))
+        self.__config_setup1_1.set_ipv6_dst(self.__config.get('multicast','all_nodes_addr'))
+        self.__sendmsgs.send_tr1_RA2(self.__config_setup1_1)
+    
+    def ping(self):
+        if self.__config_setup1_1.get_mac_ceRouter() != None:
+            self.__config_setup1_1.set_ipv6_src(self.__config.get('wan','global_wan_addr'))
+            self.__config_setup1_1.set_ether_src(self.__config.get('wan','wan_mac_tr1'))
+            self.__config_setup1_1.set_ether_dst(self.__config_setup1_1.get_mac_ceRouter())
+            self.__config_setup1_1.set_ipv6_dst(self.__config.get('lan','global_wan_addr'))
+            self.__sendmsgs.send_echo_request(self.__config_setup1_1)
 
+    def neighbor_advertise_local(self,pkt):
+        self.__config_setup1_1.set_ipv6_src(self.__config.get('wan','link_local_addr'))
+        self.__config_setup1_1.set_ether_src(self.__config.get('wan','wan_mac_tr1'))
+        self.__config_setup1_1.set_ether_dst(pkt[Ether].src)
+        self.__config_setup1_1.set_ipv6_dst(pkt[IPv6].src)
+        self.__config_setup1_1.set_tgt(self.__config.get('wan','link_local_addr'))
+        self.__config_setup1_1.set_lla(self.__config.get('wan','wan_mac_tr1'))
+        self.__config_setup1_1.set_mac_ceRouter(pkt[Ether].src)
+        self.__sendmsgs.send_icmp_na(self.__config_setup1_1)
+
+    def neighbor_advertise_global(self,pkt):
+        self.__config_setup1_1.set_ipv6_src(self.__config.get('wan','global_wan_addr'))
+        self.__config_setup1_1.set_ether_src(self.__config.get('wan','wan_mac_tr1'))
+        self.__config_setup1_1.set_ether_dst(pkt[Ether].src)
+        self.__config_setup1_1.set_ipv6_dst(pkt[IPv6].src)
+        self.__config_setup1_1.set_tgt(self.__config.get('wan','global_wan_addr'))
+        self.__config_setup1_1.set_lla(self.__config.get('wan','wan_mac_tr1'))
+        self.__config_setup1_1.set_mac_ceRouter(pkt[Ether].src)
+        self.__sendmsgs.send_icmp_na(self.__config_setup1_1)
+    def neighbor_advertise_global_tn3(self,pkt):
+        self.__config_setup1_1.set_ipv6_src(self.__config.get('t3.2.2b','tn3_ip'))
+        self.__config_setup1_1.set_ether_src(self.__config.get('t3.2.2b','tn3_mac'))
+        self.__config_setup1_1.set_ether_dst(pkt[Ether].src)
+        self.__config_setup1_1.set_ipv6_dst(pkt[IPv6].src)
+        self.__config_setup1_1.set_tgt(self.__config.get('t3.2.2b','tn3_ip'))
+        self.__config_setup1_1.set_lla(self.__config.get('t3.2.2b','tn3_mac'))
+        self.__config_setup1_1.set_mac_ceRouter(pkt[Ether].src)
+        self.__sendmsgs.send_icmp_na(self.__config_setup1_1)
 
     def ping_tn3(self):
         if self.__config_setup1_1.get_mac_ceRouter() != None:
@@ -238,49 +280,7 @@ class Test322b:
 
 
 
-    def rourter_advertise(self):
-        self.__config_setup1_1.set_ether_src(self.__config.get('wan','ra_mac'))
-        self.__config_setup1_1.set_ether_dst(self.__config.get('multicast','all_mac_nodes'))
-        self.__config_setup1_1.set_ipv6_src(self.__config.get('wan','ra_address'))
-        self.__config_setup1_1.set_ipv6_dst(self.__config.get('multicast','all_nodes_addr'))
-        self.__sendmsgs.send_tr1_RA2(self.__config_setup1_1)
-    
-    def ping(self):
-        if self.__config_setup1_1.get_mac_ceRouter() != None:
-            self.__config_setup1_1.set_ipv6_src(self.__config.get('wan','global_wan_addr'))
-            self.__config_setup1_1.set_ether_src(self.__config.get('wan','wan_mac_tr1'))
-            self.__config_setup1_1.set_ether_dst(self.__config_setup1_1.get_mac_ceRouter())
-            self.__config_setup1_1.set_ipv6_dst(self.__config.get('lan','global_wan_addr'))
-            self.__sendmsgs.send_echo_request(self.__config_setup1_1)
 
-    def neighbor_advertise_local(self,pkt):
-        self.__config_setup1_1.set_ipv6_src(self.__config.get('wan','link_local_addr'))
-        self.__config_setup1_1.set_ether_src(self.__config.get('wan','wan_mac_tr1'))
-        self.__config_setup1_1.set_ether_dst(pkt[Ether].src)
-        self.__config_setup1_1.set_ipv6_dst(pkt[IPv6].src)
-        self.__config_setup1_1.set_tgt(self.__config.get('wan','link_local_addr'))
-        self.__config_setup1_1.set_lla(self.__config.get('wan','wan_mac_tr1'))
-        self.__config_setup1_1.set_mac_ceRouter(pkt[Ether].src)
-        self.__sendmsgs.send_icmp_na(self.__config_setup1_1)
-
-    def neighbor_advertise_global(self,pkt):
-        self.__config_setup1_1.set_ipv6_src(self.__config.get('wan','global_wan_addr'))
-        self.__config_setup1_1.set_ether_src(self.__config.get('wan','wan_mac_tr1'))
-        self.__config_setup1_1.set_ether_dst(pkt[Ether].src)
-        self.__config_setup1_1.set_ipv6_dst(pkt[IPv6].src)
-        self.__config_setup1_1.set_tgt(self.__config.get('wan','global_wan_addr'))
-        self.__config_setup1_1.set_lla(self.__config.get('wan','wan_mac_tr1'))
-        self.__config_setup1_1.set_mac_ceRouter(pkt[Ether].src)
-        self.__sendmsgs.send_icmp_na(self.__config_setup1_1)
-    def neighbor_advertise_global_tn3(self,pkt):
-        self.__config_setup1_1.set_ipv6_src(self.__config.get('t3.2.2b','tn3_ip'))
-        self.__config_setup1_1.set_ether_src(self.__config.get('t3.2.2b','tn3_mac'))
-        self.__config_setup1_1.set_ether_dst(pkt[Ether].src)
-        self.__config_setup1_1.set_ipv6_dst(pkt[IPv6].src)
-        self.__config_setup1_1.set_tgt(self.__config.get('t3.2.2b','tn3_ip'))
-        self.__config_setup1_1.set_lla(self.__config.get('t3.2.2b','tn3_mac'))
-        self.__config_setup1_1.set_mac_ceRouter(pkt[Ether].src)
-        self.__sendmsgs.send_icmp_na(self.__config_setup1_1)
 
     def run(self):
 
@@ -290,10 +290,10 @@ class Test322b:
         self.__t_lan =  Thread(target=self.run_Lan,name='LAN_Thread')
         self.__t_lan.start()
         
-        self.__packet_sniffer_wan = PacketSniffer('Test273b-WAN',self.__queue_wan,self,self.__config,self.__wan_device_tr1)
+        self.__packet_sniffer_wan = PacketSniffer('Test322b-WAN',self.__queue_wan,self,self.__config,self.__wan_device_tr1)
         self.__packet_sniffer_wan.start()
         
-        self.__packet_sniffer_lan = PacketSniffer('Test273b-LAN',self.__queue_lan,self,self.__config,self.__lan_device)
+        self.__packet_sniffer_lan = PacketSniffer('Test322b-LAN',self.__queue_lan,self,self.__config,self.__lan_device)
         test_lan = self.__packet_sniffer_lan.start()
         self.__config_setup1_1.set_ra2()
         self.set_flags()
@@ -378,7 +378,8 @@ class Test322b:
                         self.neighbor_advertise_local(pkt)
 
                 if not self.__config_setup1_1.get_setup1_1_OK():
-
+                    self.set_status('WAN: Setup 1.1 em execução')
+                    logging.info('WAN: Setup 1.1 em execução')
                     if not self.__config_setup1_1.get_disapproved():
 
                         self.__config_setup1_1.run_setup1_1(pkt)
@@ -402,7 +403,7 @@ class Test322b:
                             self.__sendmsgs.send_tr1_RA2(self.__config_setup1_1)
 
                     else:
-                        logging.info('Reprovado Teste 2.7.3b - Falha em completar o Common Setup 1.1 da RFC')
+                        logging.info('Reprovado Teste 3.2.2b - Falha em completar o Common Setup 1.1 da RFC')
                         self.__packet_sniffer_wan.stop() 
                         return False
 
@@ -423,10 +424,10 @@ class Test322b:
 
                             if self.part2_lan_start:
                                 if pkt.haslayer(ICMPv6EchoRequest):
-                                    self.set_status('Reprovado Teste 2.7.3a - Recebido ICMPv6EchoRequest na WAN sendo que Routerlifime anunciado é zero')
+                                    self.set_status('Reprovado Teste 3.2.2b - Recebido ICMPv6EchoRequest na WAN sendo que Routerlifime anunciado é zero')
                                     time.sleep(2)
                                     self.set_status('REPROVADO') # Mensagem padrão para o frontEnd atualizar Status
-                                    logging.info('Reprovado Teste 2.7.3a - Recebido ICMPv6EchoRequest na WAN sendo que Routerlifime anunciado é zero')
+                                    logging.info('Reprovado Teste 3.2.2b - Recebido ICMPv6EchoRequest na WAN sendo que Routerlifime anunciado é zero')
                                     self.__packet_sniffer_wan.stop() 
                                     self.__packet_sniffer_lan.stop()
                                     self.__finish_wan = True 
@@ -478,10 +479,10 @@ class Test322b:
                         else:            
                             self.__packet_sniffer_wan.stop() 
                             self.__packet_sniffer_lan.stop()
-                            self.set_status('Teste 3.2.2a - APROVADO. Não passou pacotes da LAN para WAN após envio do RouterLife time zerado')
+                            self.set_status('Teste 3.2.2b - APROVADO. Não passou pacotes da LAN para WAN após envio do RouterLife time zerado')
                             time.sleep(2)
                             self.set_status('APROVADO')
-                            logging.info('Teste 3.2.2a - APROVADO. Não passou pacotes da LAN para WAN após envio do RouterLife time zerado')
+                            logging.info('Teste 3.2.2b - APROVADO. Não passou pacotes da LAN para WAN após envio do RouterLife time zerado')
                             return True        
                     else:
                         self.__packet_sniffer_wan.stop()
