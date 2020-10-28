@@ -127,6 +127,8 @@ class Test322b:
                     time.sleep(1)
                     t_test = t_test + 1
                     if t_test % 5 ==0:
+                        self.set_status_lan('LAN: Enviando DHCP information e RS periódico')
+                        logging.info('LAN: Enviando DHCP information e RS periódico')
                         #print('0')
                         #print('ENVIO RS - 1 LAN')
                         self.__config_setup_lan.set_ipv6_src(self.__config.get('lan','lan_local_addr'))
@@ -174,6 +176,8 @@ class Test322b:
 
 
                     if pkt[ICMPv6ND_NS].tgt == self.__config.get('lan','global_wan_addr'):
+                        self.set_status_lan('LAN: Respondendo ao NS com NA global')
+                        logging.info('LAN: Respondendo ao NS com NA global')
                         self.__config_setup_lan.set_ipv6_src(self.__config.get('lan','global_wan_addr'))
                         self.__config_setup_lan.set_ether_src(self.__config.get('lan','mac_address'))
                         self.__config_setup_lan.set_ether_dst(pkt[Ether].src)
@@ -183,7 +187,8 @@ class Test322b:
                         self.__config_setup_lan.set_mac_ceRouter(pkt[Ether].src)
                         self.__sendmsgs.send_icmp_na_lan(self.__config_setup_lan)
                     if pkt[ICMPv6ND_NS].tgt == self.__config.get('lan','lan_local_addr'):
-
+                        self.set_status_lan('LAN: Respondendo ao NS com NA local')
+                        logging.info('LAN: Respondendo ao NS com NA local')
                         self.__config_setup_lan.set_ipv6_src(self.__config.get('lan','lan_local_addr'))
                         self.__config_setup_lan.set_ether_src(self.__config.get('lan','mac_address'))
                         self.__config_setup_lan.set_ether_dst(pkt[Ether].src)
@@ -200,7 +205,8 @@ class Test322b:
                     t_test1 = t_test1 + 1
                     if t_test1 % 5 == 0: 
                         self.ping_tn3()
-
+                        self.set_status_lan('LAN: Enviando ping TN3')
+                        logging.info('LAN: Enviando ping TN3')
                     if pkt.haslayer(ICMPv6ND_NS):
 
                         if pkt[ICMPv6ND_NS].tgt == self.__config.get('lan','global_wan_addr'):
@@ -308,6 +314,8 @@ class Test322b:
                     time.sleep(1)
                     t_test = t_test + 1
                     if t_test % 10 == 0:
+                        self.set_status('WAN: Enviando ICMP RA periódico')
+                        logging.info('WAN: Enviando ICMP RA periódico')
                         self.rourter_advertise()
                     
                     if start_time_count:
@@ -360,9 +368,13 @@ class Test322b:
                 if pkt.haslayer(ICMPv6ND_NS):
 
                     if pkt[ICMPv6ND_NS].tgt == self.__config.get('wan','global_wan_addr'):
+                        self.set_status('WAN: Enviando resposta ao NS com ICMP NA global')
+                        logging.info('WAN: Enviando resposta ao NS com ICMP NA global')
                         self.neighbor_advertise_global(pkt)
                         
                     if pkt[ICMPv6ND_NS].tgt == self.__config.get('wan','link_local_addr'):
+                        self.set_status('WAN: Enviando resposta ao NS com ICMP NA local')
+                        logging.info('WAN: Enviando resposta ao NS com ICMP NA local')
                         self.neighbor_advertise_local(pkt)
 
                 if not self.__config_setup1_1.get_setup1_1_OK():
@@ -379,7 +391,8 @@ class Test322b:
                             if pkt[Ether].src == self.__config.get('wan','ra_mac'):
 
                                 continue
-
+                            self.set_status('WAN: Enviando ICMP RA com Routerlifetime maior que zero')
+                            logging.info('WAN: Enviando ICMP RA com Routerlifetime maior que zero')
                             self.__config_setup1_1.set_local_addr_ceRouter(pkt[IPv6].src)
                             self.__config_setup1_1.set_mac_ceRouter(pkt[Ether].src)                                 
                             self.__config_setup1_1.set_ether_src(self.__config.get('wan','ra_mac'))
@@ -401,12 +414,18 @@ class Test322b:
 
                             if part1_OK == False:
                                 if pkt.haslayer(ICMPv6EchoRequest):
+                                    self.set_status('WAN: Parte 1 concluida com quando Router Lifetime Maior que zero')
+                                    logging.info('WAN: Parte 1 concluida com quando Router Lifetime Maior que zero')
+
 
                                 #logging.info('Reprovado Teste 2.7.3a - Recebido ICMPv6EchoRequest na WAN sendo que Routerlifime anunciado é zero')
                                     part1_OK = True
 
                             if self.part2_lan_start:
                                 if pkt.haslayer(ICMPv6EchoRequest):
+                                    self.set_status('Reprovado Teste 2.7.3a - Recebido ICMPv6EchoRequest na WAN sendo que Routerlifime anunciado é zero')
+                                    time.sleep(2)
+                                    self.set_status('REPROVADO') # Mensagem padrão para o frontEnd atualizar Status
                                     logging.info('Reprovado Teste 2.7.3a - Recebido ICMPv6EchoRequest na WAN sendo que Routerlifime anunciado é zero')
                                     self.__packet_sniffer_wan.stop() 
                                     self.__packet_sniffer_lan.stop()
@@ -414,22 +433,24 @@ class Test322b:
                                     self.__fail_test = False
                                     return False
                             if part1_OK and not self.part2_lan_start:
-                                print('enviado1')
+                                #print('enviado1')
+                                
                                 self.__config_setup1_1.set_routerlifetime('0')
                                 self.__config_setup1_1.set_reachabletime('0')
                                 self.__config_setup1_1.set_retranstimer('0') 
 
                                 self.__sendmsgs.send_tr1_RA2(self.__config_setup1_1)
-                                print('limpando')
+                                #print('limpando')
                                 while not self.stop_ping_OK:
                                     time.sleep(1)
-                                    print('aguardando terminar')
-                                    
+                                    #print('aguardando terminar')
+                                self.set_status('WAN: Aguardando cessar mensagens Echo Request na LAN para iniciar Captura da parte 2 de ICMP RA com Router Lifetime igual zero')
                                 time.sleep(10)
                                 while not self.__queue_wan.empty():
                                     self.__queue_wan.get()
                                 
-                                print('enviando 3')
+                                #print('enviando 3')
+                                self.set_status('WAN: Enviando ICMP RA com Router Lifetime igual a zero')
                                 for x in range(3):
                                     time.sleep(1)
                                     x = x+1
@@ -438,11 +459,13 @@ class Test322b:
 
                             if pkt.haslayer(ICMPv6ND_NS):
                                 if pkt[ICMPv6ND_NS].tgt == self.__config.get('t3.2.2b','tn3_ip'):
-                                    print('glboal')
+                                    #print('glboal')
+                                    self.set_status('WAN: Solicitado NS com target TN3. Enviado NA do TN3')
                                     self.neighbor_advertise_global_tn3(pkt)
 
                                 if pkt[ICMPv6ND_NS].tgt == self.__config.get('wan','ra_address'):
-                                    print('local')
+                                    #print('local')
+                                    self.set_status('WAN: Recebido ICMP NS do TN1. Enviando Resposta ICMP NA do TN1')
                                     self.__config_setup1_1.set_ipv6_src(self.__config.get('wan','ra_address'))
                                     self.__config_setup1_1.set_ether_src(self.__config.get('wan','ra_mac'))
                                     self.__config_setup1_1.set_ether_dst(pkt[Ether].src)
@@ -455,7 +478,10 @@ class Test322b:
                         else:            
                             self.__packet_sniffer_wan.stop() 
                             self.__packet_sniffer_lan.stop()
-                            logging.info('Teste 3.7.2a - APROVADO. Não passou pacotes da LAN para WAN devido ao RouterLife time estar zerado')
+                            self.set_status('Teste 3.2.2a - APROVADO. Não passou pacotes da LAN para WAN após envio do RouterLife time zerado')
+                            time.sleep(2)
+                            self.set_status('APROVADO')
+                            logging.info('Teste 3.2.2a - APROVADO. Não passou pacotes da LAN para WAN após envio do RouterLife time zerado')
                             return True        
                     else:
                         self.__packet_sniffer_wan.stop()
