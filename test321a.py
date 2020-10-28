@@ -103,8 +103,8 @@ class Test321a:
         send_na_lan = False
         self.set_flags_lan()
         self.__config_setup_lan.set_setup_lan_start()
-        @self.__app.route("/LAN",methods=['GET'])
         cache_lan = []
+        @self.__app.route("/LAN",methods=['GET'])
         def envia_lan():
             return self.get_status_lan()
         while not self.__queue_lan.full():
