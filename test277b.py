@@ -192,7 +192,7 @@ class Test277b:
                                 self.__fail_test = False 
                                 return True  
                 else:
-                    self.set_status('WAN: Reprovado. CeRouter Enviou Prefix ULA durante o tempo de teste')
+                    self.set_status_lan('LAN: Reprovado. CeRouter Enviou Prefix ULA durante o tempo de teste')
                     time.sleep(2)
                     self.set_status_lan('REPROVADO')
                     logging.info(' Teste2.7.7b: Prefix ULA Não recebido no tempo de teste')
@@ -227,7 +227,8 @@ class Test277b:
         test_lan = self.__packet_sniffer_lan.start()
         cache_wan = []
 
-
+        temporizador_wan = 0
+        limite_test = 300
         t_test = 0
         sent_reconfigure = False
         time_over = False
@@ -238,11 +239,15 @@ class Test277b:
 
 
         while not self.__queue_wan.full():
+
             while self.__queue_wan.empty():
-                if t_test < 60:
-                    time.sleep(1)
-                    t_test = t_test + 1
-                    if t_test % 15 ==0:
+                time.sleep(1)
+                temporizador_wan = temporizador_wan + 1
+                if temporizador_wan % 20 ==0:
+                    logging.info('WAN: TEmpo limite do teste: '+str(limite_test)+' segundos. Tempo atual: ' +str(temporizador_wan))
+                    self.set_status('WAN: TEmpo limite do teste: '+str(limite_test)+' segundos. Tempo atual: ' +str(temporizador_wan))
+                if temporizador_wan < 60:
+                    if temporizador_wan % 15 ==0:
                         self.set_status('WAN: Envio periódico de RA a cada 15 seg durante 60 seg.')
 
                         self.__config_setup1_1.set_ether_src(self.__config.get('wan','ra_mac'))
@@ -256,27 +261,38 @@ class Test277b:
             pkt = self.__queue_wan.get()
             cache_wan.append(pkt)
             wrpcap("WAN-2.7.7b.cap",cache_wan)
-            if not self.__config_setup1_1.get_setup1_1_OK():
-                self.set_status('WAN: Setup 1.1 em execução.')
-                if not self.__config_setup1_1.get_disapproved():
-                    self.__config_setup1_1.run_setup1_1(pkt)
-                else:
-                    self.set_status('WAN: Reprovado. CeRouter não completou setup 1.1')
-                    time.sleep(2)
-                    self.set_status('REPROVADO')
-                    logging.info('Reprovado Teste 2.7.3a - Falha em completar o Common Setup 1.1 da RFC')
-                    self.__packet_sniffer_wan.stop() 
-                    return False
-
-            else:
-                if not self.__finish_wan:
-                    pass
-                else:
-                    self.__packet_sniffer_wan.stop()
-                    if self.__fail_test:
-                        return False
+            if temporizador_wan < limite_test:
+                if not self.__config_setup1_1.get_setup1_1_OK():
+                    self.set_status('WAN: Setup 1.1 em execução.')
+                    if not self.__config_setup1_1.get_disapproved():
+                        self.__config_setup1_1.run_setup1_1(pkt)
                     else:
-                        return True
+                        self.set_status('WAN: Reprovado. CeRouter não completou setup 1.1')
+                        time.sleep(2)
+                        self.set_status('REPROVADO')
+                        logging.info('Reprovado Teste 2.7.3a - Falha em completar o Common Setup 1.1 da RFC')
+                        self.__packet_sniffer_wan.stop() 
+                        return False
+
+                else:
+                    if not self.__finish_wan:
+                        pass
+                    else:
+                        self.__packet_sniffer_wan.stop()
+                        if self.__fail_test:
+                            return False
+                        else:
+                            return True
+            else:
+                self.set_status('WAN: Reprovado. Não Concluiu setup 1.1 no tempo de teste')
+                time.sleep(2)
+                self.set_status_lan('REPROVADO')
+                logging.info('WAN: Reprovado. Não Concluiu setup 1.1 no tempo de teste')
+                #logging.info(routerlifetime)
+                self.__packet_sniffer_lan.stop()
+                self.__packet_sniffer_wan.stop()
+                return False
+
         self.__packet_sniffer_wan.stop()
         return False
      

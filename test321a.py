@@ -111,14 +111,14 @@ class Test321a:
 
         while not self.__queue_lan.full():
             if self.__queue_lan.empty():
-                if t_test < 60:
+                if t_test < 50:
  
                     time.sleep(1)
                     t_test = t_test + 1
                     if t_test % 5 ==0:
                         #print('0')
                         #print('ENVIO RS - 1 LAN')
-                        self.set_status_lan('LAN: Enviando DHCP information e RS periódico')
+                        self.set_status_lan('LAN: Enviando DHCP information e RS periódico - MELHORAR O TESTE')
                         logging.info('LAN: Enviando DHCP information e RS periódico')
                         self.__config_setup_lan.set_ipv6_src(self.__config.get('lan','lan_local_addr'))
                         self.__config_setup_lan.set_ether_src(self.__config.get('lan','mac_address'))
@@ -150,7 +150,7 @@ class Test321a:
                             self.__sendmsgs.send_echo_request_lan(self.__config_setup_lan)
                          
 
-                    time.sleep(1)
+                    
                 else:
                     time_over = True
 
@@ -269,7 +269,7 @@ class Test321a:
         time_over = False
         cache_wan = []
 
-        finish_wan = True
+        finish_wan = False
         self.__config_setup1_1.set_pd_prefixlen(self.__config.get('t3.2.1a','pd_prefixlen')) 
         self.__config_setup1_1.set_routerlifetime(self.__config.get('t3.2.1a','routerlifetime')) 
         while not self.__queue_wan.full():
@@ -325,12 +325,11 @@ class Test321a:
                 if time_over:
                     #logging.info('FIM DA ESPERA')
                     #time_over = True
-                    self.set_status('WAN: Setup 1.1 em execução')
-                    logging.info('WAN: Setup 1.1 em execução')
                     pkt = self.__queue_wan.get()
                     #logging.info('FIM DA ESPERA')
                     if not self.__config_setup1_1.get_setup1_1_OK():
-
+                        self.set_status('WAN: Setup 1.1 em execução')
+                        logging.info('WAN: Setup 1.1 em execução')
                         if not self.__config_setup1_1.get_disapproved():
                             self.__config_setup1_1.run_setup1_1(pkt)
                             if pkt.haslayer(ICMPv6ND_RS):

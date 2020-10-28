@@ -127,7 +127,43 @@ class Test321b:
         self.__sendmsgs.send_icmp_na(self.__config_setup1_1)
 
 
+    def dhcp_information_lan(self):
+        self.__config_setup_lan.set_ipv6_src(self.__config.get('lan','lan_local_addr'))
+        self.__config_setup_lan.set_ether_src(self.__config.get('lan','mac_address'))
+        self.__config_setup_lan.set_ether_dst('33:33:00:01:00:02')
+        self.__config_setup_lan.set_ipv6_dst(self.__config.get('multicast','all_routers_addr'))
+        self.__config_setup_lan.set_xid(self.__config.get('informationlan','xid'))
+        self.__config_setup_lan.set_elapsetime(self.__config.get('informationlan','elapsetime'))
+        self.__config_setup_lan.set_vendor_class(self.__config.get('informationlan','vendorclass'))
+        self.__sendmsgs.send_dhcp_information(self.__config_setup_lan)
 
+    def icmp_rs_lan(self):
+        self.__config_setup_lan.set_ipv6_src(self.__config.get('lan','lan_local_addr'))
+        self.__config_setup_lan.set_ether_src(self.__config.get('lan','mac_address'))
+        self.__config_setup_lan.set_ether_dst(self.__config.get('multicast','all_mac_routers'))
+        self.__config_setup_lan.set_ipv6_dst(self.__config.get('general','all_routers_address'))
+        self.__config_setup_lan.set_lla(self.__config.get('lan','mac_address'))
+        self.__sendmsgs.send_icmp_rs(self.__config_setup_lan)
+
+    def icmp_na_global_lan(self,pkt):
+        self.__config_setup_lan.set_ipv6_src(self.__config.get('lan','global_wan_addr'))
+        self.__config_setup_lan.set_ether_src(self.__config.get('lan','mac_address'))
+        self.__config_setup_lan.set_ether_dst(pkt[Ether].src)
+        self.__config_setup_lan.set_ipv6_dst(pkt[IPv6].src)
+        self.__config_setup_lan.set_tgt(self.__config.get('lan','global_wan_addr'))
+        self.__config_setup_lan.set_lla(self.__config.get('lan','mac_address'))
+        self.__config_setup_lan.set_mac_ceRouter(pkt[Ether].src)
+        self.__sendmsgs.send_icmp_na_lan(self.__config_setup_lan)
+
+    def icmp_na_local_lan(self,pkt):
+        self.__config_setup_lan.set_ipv6_src(self.__config.get('lan','lan_local_addr'))
+        self.__config_setup_lan.set_ether_src(self.__config.get('lan','mac_address'))
+        self.__config_setup_lan.set_ether_dst(pkt[Ether].src)
+        self.__config_setup_lan.set_ipv6_dst(pkt[IPv6].src)
+        self.__config_setup_lan.set_tgt(self.__config.get('lan','lan_local_addr'))
+        self.__config_setup_lan.set_lla(self.__config.get('lan','mac_address'))
+        self.__config_setup_lan.set_mac_ceRouter(pkt[Ether].src)
+        self.__sendmsgs.send_icmp_na_lan(self.__config_setup_lan)
 
 
         
@@ -151,34 +187,12 @@ class Test321b:
                 if t_test < 30:
                     time.sleep(1)
                     t_test = t_test + 1
-                    if t_test % 5 ==0:
-                        self.set_status_lan('LAN: Enviando DHCP information e RS periódico')
-                        logging.info('LAN: Enviando DHCP information e RS periódico')
+                    if t_test % 5 == 0:
+                        self.set_status_lan('LAN: Transmissões de RS e DHCP information por 30 s a cada 5 seg. EXECUTAR APOS ROTEADOR REINICIADO')
+                        logging.info('LAN: Inicio das transmissões de RS e DHCP information por 30 s.')
+                        self.dhcp_information_lan() 
+                        self.icmp_rs_lan()
 
-                        self.__config_setup_lan.set_ipv6_src(self.__config.get('lan','lan_local_addr'))
-                        self.__config_setup_lan.set_ether_src(self.__config.get('lan','mac_address'))
-                        self.__config_setup_lan.set_ether_dst('33:33:00:01:00:02')
-                        self.__config_setup_lan.set_ipv6_dst(self.__config.get('multicast','all_routers_addr'))
-                        self.__config_setup_lan.set_xid(self.__config.get('informationlan','xid'))
-                        #self.__config_setup_lan.set_lla(self.__config.get('lan','mac_address'))
-                        self.__config_setup_lan.set_elapsetime(self.__config.get('informationlan','elapsetime'))
-                        self.__config_setup_lan.set_vendor_class(self.__config.get('informationlan','vendorclass'))
-                        self.__sendmsgs.send_dhcp_information(self.__config_setup_lan)
-                        
-
-                        #self.__config_setup_lan.set_setup_lan_start()
-                        self.__config_setup_lan.set_ipv6_src(self.__config.get('lan','lan_local_addr'))
-                        self.__config_setup_lan.set_ether_src(self.__config.get('lan','mac_address'))
-                        self.__config_setup_lan.set_ether_dst(self.__config.get('multicast','all_mac_routers'))
-                        self.__config_setup_lan.set_ipv6_dst(self.__config.get('general','all_routers_address'))
-                        self.__config_setup_lan.set_lla(self.__config.get('lan','mac_address'))
-                        self.__sendmsgs.send_icmp_rs(self.__config_setup_lan)
-
-
-                        #print('1')
-
-
-                    time.sleep(1)
                 else:
                     time_over = True
 
@@ -189,10 +203,10 @@ class Test321b:
                 wrpcap("lan-3.2.1b.cap",cache_lan)
                 if not time_over:
                     if pkt.haslayer(ICMPv6EchoRequest):
-                        self.set_status_lan('Reprovado Teste 3.2.1b - Recebeu ICMPv6EchoRequest antes do IP_PD ser fornecido à porta WAN do roteador')
+                        self.set_status_lan('Reprovado Teste 3.2.1b - Recebeu ICMPv6EchoRequest na LAN antes do IP_PD ser fornecido à porta WAN do roteador')
                         time.sleep(2)
                         self.set_status_lan('REPROVADO') # Mensagem padrão para o frontEnd atualizar Status
-
+                        logging.info('Reprovado Teste 3.2.1b - Recebeu ICMPv6EchoRequest antes do IP_PD ser fornecido à porta WAN do roteador')
 
                         self.__packet_sniffer_lan.stop()
                         self.__finish_wan = True 
@@ -215,15 +229,15 @@ class Test321b:
 
 
                         if pkt.haslayer(ICMPv6EchoRequest):
-
+                            self.set_status_lan('Reprovado Teste 3.2.1b - Recebeu ICMPv6EchoRequest na LAN antes do IP_PD ser fornecido à porta WAN do roteador')
+                            time.sleep(2)
+                            self.set_status_lan('REPROVADO') # Mensagem padrão para o frontEnd atualizar Status
                             logging.info('Reprovado Teste 3.2.1b - Recebeu ICMPv6EchoRequest antes do IP_PD ser fornecido à porta WAN do roteador')
-                            self.__packet_sniffer_wan.stop() 
-                            return False
-                            #print('AQUI-2.0')
                             self.__packet_sniffer_lan.stop()
                             self.__finish_wan = True 
-                            self.__fail_test = False
-                            return False
+                            self.__fail_test = True
+                            return False                            
+
 
                         if pkt[ICMPv6ND_NS].tgt == self.__config.get('lan','global_wan_addr'):
                             self.__config_setup_lan.set_ipv6_src(self.__config.get('lan','global_wan_addr'))

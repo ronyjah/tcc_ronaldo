@@ -260,6 +260,7 @@ class Test324:
                         if pkt[ICMPv6NDOptPrefixInfo].prefix == self.__config.get('t3.2.4','prefix_ula'):
                                 logging.info('LAN: Recebido prefixo esperado. Inciando tentativa de Pingar um endereco Global')
                                 self.set_status_lan('LAN: Recebido prefixo esperado. Inciando tentativa de Pingar um endereco Global')
+                                time.sleep(2)
                                 self.ping_tn1_ula()
                         else:
                             self.__finish_wan = True
@@ -270,6 +271,7 @@ class Test324:
                             time.sleep(2)
                             logging.info('Teste 3.2.4 - FALHA. VERIFIQUE O PREFIXO ULA CONFIGURADO NO ROTEADOR')
                             self.set_status_lan('REPROVADO')
+
                             print(pkt[ICMPv6NDOptPrefixInfo].prefix)
                             return False   
      
@@ -459,7 +461,7 @@ class Test324:
                             if pkt.haslayer(ICMPv6EchoRequest):
                                 logging.info('WAN: TEST 3.2.4: UNIQUE LOCAL ADDRESS FORWARDING....REPROVADO')
                                 logging.info('WAN: Indevido recebimento de Echo Request na WAN de um IP proveniente pela ULA do roteador atribuido aos hosts na LAN')
-                                self.set_status('WAN: Indevido recebimento de Echo Request na WAN de um IP proveniente pela ULA do roteador atribuido aos hosts na LAN')
+                                self.set_status('WAN: Indevido recebimento de Echo Request na WAN de um IP gerado pela ULA do roteador aos hosts na LAN')
                                 time.sleep(2)
                                 self.set_status('REPROVADO')
                                 self.__packet_sniffer_wan.stop() 

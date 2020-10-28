@@ -144,7 +144,46 @@ class Test322a:
             self.__config_setup_lan.set_ether_dst(self.__config_setup_lan.get_mac_ceRouter())
             self.__config_setup_lan.set_ipv6_dst(self.__config.get('t3.2.2a','tn3_ip'))
             self.__sendmsgs.send_echo_request_lan(self.__config_setup_lan)
-        
+
+    def dhcp_information_lan(self):
+        self.__config_setup_lan.set_ipv6_src(self.__config.get('lan','lan_local_addr'))
+        self.__config_setup_lan.set_ether_src(self.__config.get('lan','mac_address'))
+        self.__config_setup_lan.set_ether_dst('33:33:00:01:00:02')
+        self.__config_setup_lan.set_ipv6_dst(self.__config.get('multicast','all_routers_addr'))
+        self.__config_setup_lan.set_xid(self.__config.get('informationlan','xid'))
+        self.__config_setup_lan.set_elapsetime(self.__config.get('informationlan','elapsetime'))
+        self.__config_setup_lan.set_vendor_class(self.__config.get('informationlan','vendorclass'))
+        self.__sendmsgs.send_dhcp_information(self.__config_setup_lan)
+
+    def icmp_rs_lan(self):
+        self.__config_setup_lan.set_ipv6_src(self.__config.get('lan','lan_local_addr'))
+        self.__config_setup_lan.set_ether_src(self.__config.get('lan','mac_address'))
+        self.__config_setup_lan.set_ether_dst(self.__config.get('multicast','all_mac_routers'))
+        self.__config_setup_lan.set_ipv6_dst(self.__config.get('general','all_routers_address'))
+        self.__config_setup_lan.set_lla(self.__config.get('lan','mac_address'))
+        self.__sendmsgs.send_icmp_rs(self.__config_setup_lan)
+
+    def icmp_na_global_lan(self,pkt):
+        self.__config_setup_lan.set_ipv6_src(self.__config.get('lan','global_wan_addr'))
+        self.__config_setup_lan.set_ether_src(self.__config.get('lan','mac_address'))
+        self.__config_setup_lan.set_ether_dst(pkt[Ether].src)
+        self.__config_setup_lan.set_ipv6_dst(pkt[IPv6].src)
+        self.__config_setup_lan.set_tgt(self.__config.get('lan','global_wan_addr'))
+        self.__config_setup_lan.set_lla(self.__config.get('lan','mac_address'))
+        self.__config_setup_lan.set_mac_ceRouter(pkt[Ether].src)
+        self.__sendmsgs.send_icmp_na_lan(self.__config_setup_lan)
+
+    def icmp_na_local_lan(self,pkt):
+        self.__config_setup_lan.set_ipv6_src(self.__config.get('lan','lan_local_addr'))
+        self.__config_setup_lan.set_ether_src(self.__config.get('lan','mac_address'))
+        self.__config_setup_lan.set_ether_dst(pkt[Ether].src)
+        self.__config_setup_lan.set_ipv6_dst(pkt[IPv6].src)
+        self.__config_setup_lan.set_tgt(self.__config.get('lan','lan_local_addr'))
+        self.__config_setup_lan.set_lla(self.__config.get('lan','mac_address'))
+        self.__config_setup_lan.set_mac_ceRouter(pkt[Ether].src)
+        self.__sendmsgs.send_icmp_na_lan(self.__config_setup_lan)
+
+
     def run_Lan(self):
         #self.__config_setup_lan_.flags_partA()
         logging.info('Thread da LAN inicio')
@@ -166,34 +205,13 @@ class Test322a:
         while not self.__queue_lan.full():
             if self.__queue_lan.empty():
                 if t_test < 30:
- 
                     time.sleep(1)
                     t_test = t_test + 1
                     if t_test % 5 ==0:
-                        self.set_status_lan('LAN: Enviando DHCP information e RS periódico')
-                        logging.info('LAN: Enviando DHCP information e RS periódico')
-
-
-                        self.__config_setup_lan.set_ipv6_src(self.__config.get('lan','lan_local_addr'))
-                        self.__config_setup_lan.set_ether_src(self.__config.get('lan','mac_address'))
-                        self.__config_setup_lan.set_ether_dst('33:33:00:01:00:02')
-                        self.__config_setup_lan.set_ipv6_dst(self.__config.get('multicast','all_routers_addr'))
-                        self.__config_setup_lan.set_xid(self.__config.get('informationlan','xid'))
-
-                        self.__config_setup_lan.set_elapsetime(self.__config.get('informationlan','elapsetime'))
-                        self.__config_setup_lan.set_vendor_class(self.__config.get('informationlan','vendorclass'))
-                        self.__sendmsgs.send_dhcp_information(self.__config_setup_lan)
-                        
-                        self.__config_setup_lan.set_ipv6_src(self.__config.get('lan','lan_local_addr'))
-                        self.__config_setup_lan.set_ether_src(self.__config.get('lan','mac_address'))
-                        self.__config_setup_lan.set_ether_dst(self.__config.get('multicast','all_mac_routers'))
-                        self.__config_setup_lan.set_ipv6_dst(self.__config.get('general','all_routers_address'))
-                        self.__config_setup_lan.set_lla(self.__config.get('lan','mac_address'))
-                        self.__sendmsgs.send_icmp_rs(self.__config_setup_lan)
-
-
-                    logging.info('Thread da LAN time')
-                    time.sleep(1)
+                        self.set_status_lan('LAN: Transmissões de RS e DHCP information por 30 s a cada 5 seg.')
+                        logging.info('LAN: Inicio das transmissões de RS e DHCP information por 30 s.')
+                        self.dhcp_information_lan() 
+                        self.icmp_rs_lan()
                 else:
                     time_over = True
 
@@ -215,32 +233,16 @@ class Test322a:
                     continue
 
                 if pkt.haslayer(ICMPv6ND_NS):
-
-
                     if pkt[ICMPv6ND_NS].tgt == self.__config.get('lan','global_wan_addr'):
                         self.set_status_lan('LAN: Respondendo ao NS com NA global')
                         logging.info('LAN: Respondendo ao NS com NA global')
-                        self.__config_setup_lan.set_ipv6_src(self.__config.get('lan','global_wan_addr'))
-                        self.__config_setup_lan.set_ether_src(self.__config.get('lan','mac_address'))
-                        self.__config_setup_lan.set_ether_dst(pkt[Ether].src)
-                        self.__config_setup_lan.set_ipv6_dst(pkt[IPv6].src)
-                        self.__config_setup_lan.set_tgt(self.__config.get('lan','global_wan_addr'))
-                        self.__config_setup_lan.set_lla(self.__config.get('lan','mac_address'))
-                        self.__config_setup_lan.set_mac_ceRouter(pkt[Ether].src)
-                        self.__sendmsgs.send_icmp_na_lan(self.__config_setup_lan)
+                        self.icmp_na_global_lan(pkt)
 
                     if pkt[ICMPv6ND_NS].tgt == self.__config.get('lan','lan_local_addr'):
                         self.set_status_lan('LAN: Respondendo ao NS com NA local')
-                        logging.info('LAN: Respondendo ao NS com NA local')
-                        self.__config_setup_lan.set_ipv6_src(self.__config.get('lan','lan_local_addr'))
-                        self.__config_setup_lan.set_ether_src(self.__config.get('lan','mac_address'))
-                        self.__config_setup_lan.set_ether_dst(pkt[Ether].src)
-                        self.__config_setup_lan.set_ipv6_dst(pkt[IPv6].src)
-                        self.__config_setup_lan.set_tgt(self.__config.get('lan','lan_local_addr'))
-                        self.__config_setup_lan.set_lla(self.__config.get('lan','mac_address'))
-                        self.__config_setup_lan.set_mac_ceRouter(pkt[Ether].src)
-                        self.__sendmsgs.send_icmp_na_lan(self.__config_setup_lan)
-                        
+                        logging.info('LAN: Respondendo ao NS com NA local')                        
+                        self.icmp_na_local_lan(pkt)
+
             if self.__config_setup1_1.get_setup1_1_OK():
                 if pkt[Ether].src == self.__config.get('lan','mac_address'):
                     continue
@@ -251,33 +253,30 @@ class Test322a:
                         logging.info('LAN: Enviando ping TN3') 
                         self.ping_tn3()
                         
-
-                    if pkt.haslayer(ICMPv6ND_NS):
-
-
-                        if pkt[ICMPv6ND_NS].tgt == self.__config.get('lan','global_wan_addr'):
-                            self.set_status_lan('LAN: Respondendo ao NS com NA global')
-                            logging.info('LAN: Respondendo ao NS com NA global')
-                            self.__config_setup_lan.set_ipv6_src(self.__config.get('lan','global_wan_addr'))
-                            self.__config_setup_lan.set_ether_src(self.__config.get('lan','mac_address'))
-                            self.__config_setup_lan.set_ether_dst(pkt[Ether].src)
-                            self.__config_setup_lan.set_ipv6_dst(pkt[IPv6].src)
-                            self.__config_setup_lan.set_tgt(self.__config.get('lan','global_wan_addr'))
-                            self.__config_setup_lan.set_lla(self.__config.get('lan','mac_address'))
-                            self.__config_setup_lan.set_mac_ceRouter(pkt[Ether].src)
-                            self.__sendmsgs.send_icmp_na_lan(self.__config_setup_lan)
+                    # if pkt.haslayer(ICMPv6ND_NS):
+                    #     if pkt[ICMPv6ND_NS].tgt == self.__config.get('lan','global_wan_addr'):
+                    #         self.set_status_lan('LAN: Respondendo ao NS com NA global')
+                    #         logging.info('LAN: Respondendo ao NS com NA global')
+                    #         self.__config_setup_lan.set_ipv6_src(self.__config.get('lan','global_wan_addr'))
+                    #         self.__config_setup_lan.set_ether_src(self.__config.get('lan','mac_address'))
+                    #         self.__config_setup_lan.set_ether_dst(pkt[Ether].src)
+                    #         self.__config_setup_lan.set_ipv6_dst(pkt[IPv6].src)
+                    #         self.__config_setup_lan.set_tgt(self.__config.get('lan','global_wan_addr'))
+                    #         self.__config_setup_lan.set_lla(self.__config.get('lan','mac_address'))
+                    #         self.__config_setup_lan.set_mac_ceRouter(pkt[Ether].src)
+                    #         self.__sendmsgs.send_icmp_na_lan(self.__config_setup_lan)
                             
-                        if pkt[ICMPv6ND_NS].tgt == self.__config.get('lan','lan_local_addr'):
-                            self.set_status_lan('LAN: Respondendo ao NS com NA local')
-                            logging.info('LAN: Respondendo ao NS com NA local')
-                            self.__config_setup_lan.set_ipv6_src(self.__config.get('lan','lan_local_addr'))
-                            self.__config_setup_lan.set_ether_src(self.__config.get('lan','mac_address'))
-                            self.__config_setup_lan.set_ether_dst(pkt[Ether].src)
-                            self.__config_setup_lan.set_ipv6_dst(pkt[IPv6].src)
-                            self.__config_setup_lan.set_tgt(self.__config.get('lan','lan_local_addr'))
-                            self.__config_setup_lan.set_lla(self.__config.get('lan','mac_address'))
-                            self.__config_setup_lan.set_mac_ceRouter(pkt[Ether].src)
-                            self.__sendmsgs.send_icmp_na_lan(self.__config_setup_lan)
+                    #     if pkt[ICMPv6ND_NS].tgt == self.__config.get('lan','lan_local_addr'):
+                    #         self.set_status_lan('LAN: Respondendo ao NS com NA local')
+                    #         logging.info('LAN: Respondendo ao NS com NA local')
+                    #         self.__config_setup_lan.set_ipv6_src(self.__config.get('lan','lan_local_addr'))
+                    #         self.__config_setup_lan.set_ether_src(self.__config.get('lan','mac_address'))
+                    #         self.__config_setup_lan.set_ether_dst(pkt[Ether].src)
+                    #         self.__config_setup_lan.set_ipv6_dst(pkt[IPv6].src)
+                    #         self.__config_setup_lan.set_tgt(self.__config.get('lan','lan_local_addr'))
+                    #         self.__config_setup_lan.set_lla(self.__config.get('lan','mac_address'))
+                    #         self.__config_setup_lan.set_mac_ceRouter(pkt[Ether].src)
+                    #         self.__sendmsgs.send_icmp_na_lan(self.__config_setup_lan)
 
 
 

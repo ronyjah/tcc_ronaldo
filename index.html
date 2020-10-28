@@ -463,6 +463,8 @@ function toggleButton(button_id)
   // xhttp_lan.send();
 }
 var test_id = 'None';
+var msg_lan = 'None';
+var msg_wan = 'None';
 $("button").click(function() {
   if(test_id == 'None'){
       test_id = this.id;
@@ -471,7 +473,7 @@ $("button").click(function() {
   interval = setInterval(function(){
     loadDoc();
 
-  },1000);
+  },800);
 })
   function loadDoc() {
  
@@ -479,7 +481,17 @@ $("button").click(function() {
 
     xhttp.onreadystatechange = function() {
       if (this.status == 200) {
-        document.getElementById("demomo").innerHTML = this.responseText;
+        if (this.responseText == 'APROVADO'){
+          document.getElementById(test_id).innerText = "Success";
+          document.getElementById(test_id).className = "badge badge-success";
+        }
+        else if (this.responseText == 'REPROVADO'){
+          document.getElementById(test_id).innerText = "Fail";
+          document.getElementById(test_id).className = "badge badge-danger";
+        }
+        else if (this.responseText != ''){
+          msg_wan = this.responseText;
+          document.getElementById("demomo").innerHTML = msg_wan;}
       }
     };
     xhttp.open("GET","http://127.0.0.1:5000/WAN",true);
@@ -493,22 +505,18 @@ $("button").click(function() {
           document.getElementById(test_id).innerText = "Success";
           document.getElementById(test_id).className = "badge badge-success";
         }
-        if (this.responseText == 'REPROVADO'){
+        else if (this.responseText == 'REPROVADO'){
           document.getElementById(test_id).innerText = "Fail";
           document.getElementById(test_id).className = "badge badge-danger";
         }
-        document.getElementById("demolan").innerHTML = this.responseText;
+        else if (this.responseText != ''){
+          msg_lan = this.responseText;
+          document.getElementById("demolan").innerHTML = msg_lan;}
       }
     };
     xhttp_lan.open("GET","http://127.0.0.1:5000/LAN",true);
     xhttp_lan.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
     xhttp_lan.send();
-
-
-
-
-
-
   };
 </script>
 

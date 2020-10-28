@@ -109,10 +109,18 @@ class Test277c:
 
         while not self.__queue_lan.full():
             while self.__queue_lan.empty():
-                if t_test1 < 120:
+                if t_test1 < 80:
                     time.sleep(1)
                     t_test1 = t_test1 + 1
-
+                    if t_test1 % 5 == 0:
+                        logging.info('LAN: Enviando  RS periódico: tempo limite: '+str(80)+' segundos. Tempo atual: ' +str(t_test1))
+                        self.set_status_lan('LAN: Enviando  RS periódico: tempo limite: '+str(80)+' segundos. Tempo atual: ' +str(t_test1))
+                        self.__config_setup_lan.set_ipv6_src(self.__config.get('lan','lan_local_addr'))
+                        self.__config_setup_lan.set_ether_src(self.__config.get('lan','mac_address'))
+                        self.__config_setup_lan.set_ether_dst(self.__config.get('multicast','all_mac_routers'))
+                        self.__config_setup_lan.set_ipv6_dst(self.__config.get('general','all_routers_address'))
+                        self.__config_setup_lan.set_lla(self.__config.get('lan','mac_address'))
+                        self.__sendmsgs.send_icmp_rs(self.__config_setup_lan)
                 else:
                     self.set_status_lan('Reprovado Teste 2.7.7c - Prefix ULA Não recebido durante o tempo de teste')
                     time.sleep(2)
@@ -144,7 +152,7 @@ class Test277c:
 
                 
     def run(self):
-        self.set_status('Ative a ULA com prefixo: ' +  self.__config.get('t2.7.7c','prefix_ula') + 'e reinicie o Roteador')
+        self.set_status('Ative a ULA com prefixo: ' +  self.__config.get('t2.7.7c','prefix_ula') + ' Reinicie o Roteador')
 
         @self.__app.route("/WAN",methods=['GET'])
         def enviawan():
@@ -153,7 +161,7 @@ class Test277c:
         self.set_flags()
         logging.info(self.__test_desc)
         logging.info('==================================================================================')
-        logging.info('Ative a ULA com prefixo: ' +  self.__config.get('t2.7.7c','prefix_ula') + 'e reinicie o Roteador') 
+        logging.info('Ative a ULA com prefixo: ' +  self.__config.get('t2.7.7c','prefix_ula') + ' Reinicie o Roteador') 
         logging.info('==================================================================================')
         
         time.sleep(10)
