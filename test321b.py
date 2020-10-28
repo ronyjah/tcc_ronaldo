@@ -189,7 +189,7 @@ class Test321b:
                 wrpcap("lan-3.2.1b.cap",cache_lan)
                 if not time_over:
                     if pkt.haslayer(ICMPv6EchoRequest):
-                        self.set_status_lan('Reprovado Teste 3.2.1b - Recebeu ICMPv6EchoRequest antes do IP_PD ser fornecido à porta WAN do roteador'')
+                        self.set_status_lan('Reprovado Teste 3.2.1b - Recebeu ICMPv6EchoRequest antes do IP_PD ser fornecido à porta WAN do roteador')
                         time.sleep(2)
                         self.set_status_lan('REPROVADO') # Mensagem padrão para o frontEnd atualizar Status
 

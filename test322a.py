@@ -158,9 +158,11 @@ class Test322a:
         self.set_flags_lan()
         self.__config_setup_lan.set_setup_lan_start()
         cache_lan = []
+
         @self.__app.route("/LAN",methods=['GET'])
         def envia_lan():
             return self.get_status_lan()
+            
         while not self.__queue_lan.full():
             if self.__queue_lan.empty():
                 if t_test < 30:
