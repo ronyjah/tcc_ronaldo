@@ -176,7 +176,7 @@ class Test274a:
         def envia_lan():
             return self.get_status_lan()
         #self.__config_setup_lan_.flags_partA()
-        logging.info('Thread da LAN inicio')
+
         t_test = 0
         sent_reconfigure = False
         time_over = False
@@ -237,8 +237,8 @@ class Test274a:
                 self.set_status_lan('Setup LAN concluido. Verificando o recebimento Recursive DNS')
                 if self.__config_setup_lan.get_recvd_dhcp_rdnss():
            
-                    logging.info('Aprovado Teste 2.7.4a: Recebido Recursive DNS OK.')
-                    self.set_status_lan('APROVADO Teste 2.7.4a: Recebido Recursive DNS OK')
+                    logging.info('Aprovado Teste 2.7.4a: Recebido Recursive DNS.')
+                    self.set_status_lan('APROVADO Teste 2.7.4a: Recebido Recursive DNS')
                     time.sleep(2)
                     self.set_status_lan('APROVADO') # Mensagem padrão para o frontEnd atualizar Status
                     
@@ -322,8 +322,8 @@ class Test274a:
 
 
             else: 
-                logging.info('WAN: Checando a existencia de DNS Opt List')
-                self.set_status('WAN: Checando a existencia de DNS Opt List')
+                logging.info('WAN: Checando o recebimento de Renew')
+                self.set_status('WAN: Checando o recebimento de Renew')
                 self.__config_setup1_1.check_layers(pkt)
      
         self.__packet_sniffer_wan.stop()

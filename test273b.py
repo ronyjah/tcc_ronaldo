@@ -38,6 +38,8 @@ class Test273b:
         self.__all_nodes_addr = self.__config.get('multicast','all_nodes_addr')
         self.__test_desc = self.__config.get('tests','2.7.3b')
         self.__t_lan = None
+        self.__fail_test = False
+        self.__finish_wan = False
         self.msg = self.__config.get('tests','2.7.3b')
         self.msg_lan =self.__config.get('tests','2.7.3b')
         self.__config_setup_lan = ConfigSetup1_1_Lan(self.__config,self.__lan_device)
@@ -87,6 +89,14 @@ class Test273b:
     def get_status(self):
         return self.msg
 
+    def rs_lan(self):
+
+        self.__config_setup_lan.set_ipv6_src(self.__config.get('lan','lan_local_addr'))
+        self.__config_setup_lan.set_ether_src(self.__config.get('lan','mac_address'))
+        self.__config_setup_lan.set_ether_dst(self.__config.get('multicast','all_mac_routers'))
+        self.__config_setup_lan.set_ipv6_dst(self.__config.get('general','all_routers_address'))
+        self.__config_setup_lan.set_lla(self.__config.get('lan','mac_address'))
+        self.__sendmsgs.send_icmp_rs(self.__config_setup_lan)
 
     def run_Lan(self):
 
@@ -94,7 +104,7 @@ class Test273b:
         def envia_lan():
             return self.get_status_lan()
         #self.__config_setup_lan_.flags_partA()
-        logging.info('Thread da LAN inicio')
+
         t_test = 0
         sent_reconfigure = False
         time_over = False
@@ -103,21 +113,20 @@ class Test273b:
         while not self.__queue_lan.full():
             while self.__queue_lan.empty():
                 if t_test < 35:
-                    logging.info('Thread da LAN time')
                     time.sleep(1)
+
                     if self.__config_setup1_1.get_setup1_1_OK():
-                        logging.info('Thread da WAN DONE')
                         t_test = t_test + 1
+                        logging.info('LAN: Fim do Setup1.1. Aguardando 35 segundos para enviar RS a LAN do Roteador Tempo: ' +str(t_test))
+                        self.set_status_lan('LAN: Fim do Setup1.1. Aguardando 35 segundos para enviar RS ao Roteador . Tempo: ' +str(t_test))
+
+
                     #pkt = self.__queue_lan.get()
                 else:
-                    self.__config_setup_lan.set_setup_lan_start()
-                    self.__config_setup_lan.set_ipv6_src(self.__config.get('lan','lan_local_addr'))
-                    self.__config_setup_lan.set_ether_src(self.__config.get('lan','mac_address'))
-                    self.__config_setup_lan.set_ether_dst(self.__config.get('multicast','all_mac_routers'))
-                    self.__config_setup_lan.set_ipv6_dst(self.__config.get('general','all_routers_address'))
-                    self.__config_setup_lan.set_lla(self.__config.get('lan','mac_address'))
-                    self.__sendmsgs.send_icmp_rs(self.__config_setup_lan)
-                    time_over = True
+                    logging.info('LAN: Fim do tempo valid life time designado. Enviando RS')
+                    self.set_status_lan('LAN:Fim do tempo valid life time designado. Enviando RS') 
+                    self.__config_setup_lan.set_setup_lan_start() # nada funciona na LAN enquanto essa função nao executar
+                    self.rs_lan()
            
             pkt = self.__queue_lan.get()
             cache_lan.append(pkt)
@@ -126,24 +135,44 @@ class Test273b:
                 if not self.__config_setup_lan.get_disapproved():
                     self.__config_setup_lan.run_setup1_1(pkt)
                 else:
-                    logging.info('Reprovado Teste 2.7.3b - Falha em completar o Common Setup 1.1 da RFC')
-                    self.__packet_sniffer_lan.stop() 
-                    return False       
+                    logging.info('LAN: Reprovado Teste 2.7.4a - Falha em completar o setup LAN')
+                    self.set_status_lan('LAN: Reprovado Teste 2.7.4a - Falha em completar o setup LAN')
+                    time.sleep(2)
+                    self.set_status_lan('REPROVADO') # Mensagem padrão para o frontEnd atualizar Status
+                    self.__packet_sniffer_lan.stop()
+                    self.__finish_wan = True 
+                    self.__fail_test = True
+                    return False  
             else:
-                logging.info('Setup LAN  Concluido')
+                logging.info('Setup LAN concluido. Verificando o valor de routerlifetime ')
+                self.set_status_lan('Setup LAN concluido. o valor de  routerlifetime')
                 routerlifetime = self.__config_setup_lan.get_routerlifetime_CeRouter()
                 if routerlifetime == 0:
-                    logging.info(' Teste 2.7.3b: routerlifetime OK. routerlifetime  igual a 0')
-                    logging.info('Aprovado Teste2.7.3b.')
+                    logging.info(' APROVADO  Teste 2.7.3b: routerlifetime OK. routerlifetime  igual a 0')
+                    self.set_status_lan('APROVADO  Teste 2.7.3b: routerlifetime OK. routerlifetime  igual a 0')
+                    time.sleep(2)
+                    self.set_status_lan('APROVADO') # Mensagem padrão para o frontEnd atualizar Status
+                    
                     self.__packet_sniffer_lan.stop()
-                    return True
+                    self.__finish_wan = True
+                    self.__fail_test = False 
+                    return True        
                 else:                     
-                    logging.info(' Teste2.7.3b: Reprovado. routerlifetime acima de 0 ')
-                    logging.info(routerlifetime)
+                    logging.info(' REPROVADO  Teste 2.7.3b: routerlifetime. routerlifetime  acima de 0')
+                    self.set_status_lan('REPROVADO  Teste 2.7.3b: routerlifetime. routerlifetime  acima de 0')
+                    time.sleep(2)
+                    self.set_status_lan('REPROVADO') # Mensagem padrão para o frontEnd atualizar Status
                     self.__packet_sniffer_lan.stop()
-                    return False
+                    self.__finish_wan = True
+                    self.__fail_test = False 
+                    return True   
 
-
+    def ra_wan(self):
+        self.__config_setup1_1.set_ether_src(self.__config.get('wan','ra_mac'))
+        self.__config_setup1_1.set_ether_dst(self.__config.get('multicast','all_mac_nodes'))
+        self.__config_setup1_1.set_ipv6_src(self.__config.get('wan','ra_address'))
+        self.__config_setup1_1.set_ipv6_dst(self.__config.get('multicast','all_nodes_addr'))
+        self.__sendmsgs.send_tr1_RA(self.__config_setup1_1)
                 
     def run(self):
         @self.__app.route("/WAN",methods=['GET'])
@@ -164,41 +193,60 @@ class Test273b:
         sent_reconfigure = False
         time_over = False
 
-        finish_wan = True
+        test_max_time = 300
+        temporizador = 0 
         self.__config_setup1_1.set_pd_prefixlen(self.__config.get('t2.7.3b','pd_prefixlen')) 
         self.__config_setup1_1.set_routerlifetime(self.__config.get('t2.7.3b','routerlifetime')) 
         while not self.__queue_wan.full():
             while self.__queue_wan.empty():
-                if t_test < 60:
-                    time.sleep(1)
-                    if t_test % 5 ==0:
-                        self.__config_setup1_1.set_ether_src(self.__config.get('wan','ra_mac'))
-                        self.__config_setup1_1.set_ether_dst(self.__config.get('multicast','all_mac_nodes'))
-                        self.__config_setup1_1.set_ipv6_src(self.__config.get('wan','ra_address'))
-                        self.__config_setup1_1.set_ipv6_dst(self.__config.get('multicast','all_nodes_addr'))
-                        self.__sendmsgs.send_tr1_RA(self.__config_setup1_1)
-                    t_test = t_test + 1
+                time.sleep(1)
+
+                if temporizador < test_max_time:
+                    temporizador = temporizador + 1
                 else:
-                    time_over = True
+                    self.set_status('WAN: Reprovado. Timeout')
+                    time.sleep(2)
+                    self.set_status('REPROVADO')
+                    logging.info('WAN: Reprovado. Timeout')
+                    #logging.info(routerlifetime)
+                    self.__packet_sniffer_lan.stop()
+                    self.__packet_sniffer_wan.stop()
+                    return False  
+
+                if temporizador % 10 ==0:
+                    logging.info('WAN: Envio de RA periódico')
+                    self.set_status('WAN: Envio de RA periódico')                        
+                    self.ra_wan()
+                    
+
             pkt = self.__queue_wan.get()
+
             cache_wan.append(pkt)
             wrpcap("WAN-2.7.3b.cap",cache_wan)
+            
             if not self.__config_setup1_1.get_setup1_1_OK():
-
+                logging.info('WAN: Setup 1.1 em execução')
+                self.set_status('WAN: Setup 1.1 em execução') 
                 if not self.__config_setup1_1.get_disapproved():
                     self.__config_setup1_1.run_setup1_1(pkt)
                 else:
-                    logging.info('Reprovado Teste 2.7.3a - Falha em completar o Common Setup 1.1 da RFC')
-                    self.__packet_sniffer_wan.stop() 
-                    return False
+                    logging.info('WAN: Reprovado Teste 2.7.3b - Falha em completar o setup 1.1')
+                    self.set_status('WAN: Reprovado Teste 2.7.3b - Falha em completar o setup 1.1')
+                    time.sleep(2)
+                    self.set_status('REPROVADO') # Mensagem padrão para o frontEnd atualizar Status
+                    self.__packet_sniffer_lan.stop()
+                    self.__finish_wan = True
+                    self.__fail_test = True 
 
-            else: 
-                print('WAN - Concluido')
-                print('LAN RESULT')
-                print(test_lan)
-                if not finish_wan:
+            else:
+                logging.info('WAN: Setup 1.1 Concluido')
+                self.set_status('WAN: Setup 1.1 Concluido') 
+                if self.__finish_wan: 
                     self.__packet_sniffer_wan.stop()
-                    finish_wan = True 
+                    if self.__fail_test:
+                        return False
+                    else:
+                        return True
   
         self.__packet_sniffer_wan.stop()
         return False
