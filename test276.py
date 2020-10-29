@@ -47,13 +47,13 @@ class Test276:
 
 
     def set_flags(self):
-        self.__config_setup1_1.set_flag_M(self.__config.get('t1.6.6b','flag_m'))
-        self.__config_setup1_1.set_flag_0(self.__config.get('t1.6.6b','flag_o'))
-        self.__config_setup1_1.set_flag_chlim(self.__config.get('t1.6.6b','flag_chlim'))
-        self.__config_setup1_1.set_flag_L(self.__config.get('t1.6.6b','flag_l'))
-        self.__config_setup1_1.set_flag_A(self.__config.get('t1.6.6b','flag_a'))
-        self.__config_setup1_1.set_flag_R(self.__config.get('t1.6.6b','flag_r'))
-        self.__config_setup1_1.set_flag_prf(self.__config.get('t1.6.6b','flag_prf'))
+        self.__config_setup1_1.set_flag_M(self.__config.get('t2.7.6','flag_m'))
+        self.__config_setup1_1.set_flag_0(self.__config.get('t2.7.6','flag_o'))
+        self.__config_setup1_1.set_flag_chlim(self.__config.get('t2.7.6','flag_chlim'))
+        self.__config_setup1_1.set_flag_L(self.__config.get('t2.7.6','flag_l'))
+        self.__config_setup1_1.set_flag_A(self.__config.get('t2.7.6','flag_a'))
+        self.__config_setup1_1.set_flag_R(self.__config.get('t2.7.6','flag_r'))
+        self.__config_setup1_1.set_flag_prf(self.__config.get('t2.7.6','flag_prf'))
         self.__config_setup1_1.set_validlifetime(self.__config.get('t2.7.6','validlifetime'))
         self.__config_setup1_1.set_preferredlifetime(self.__config.get('t2.7.6','preferredlifetime'))
         self.__config_setup1_1.set_routerlifetime(self.__config.get('t2.7.6','routerlifetime'))

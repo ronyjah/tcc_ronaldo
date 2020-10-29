@@ -90,6 +90,15 @@ class Test321a:
     def get_status(self):
         return self.msg
 
+    def dhcp_information_lan(self):
+        self.__config_setup_lan.set_ipv6_src(self.__config.get('lan','lan_local_addr'))
+        self.__config_setup_lan.set_ether_src(self.__config.get('lan','mac_address'))
+        self.__config_setup_lan.set_ether_dst('33:33:00:01:00:02')
+        self.__config_setup_lan.set_ipv6_dst(self.__config.get('multicast','all_routers_addr'))
+        self.__config_setup_lan.set_xid(self.__config.get('informationlan','xid'))
+        self.__config_setup_lan.set_elapsetime(self.__config.get('informationlan','elapsetime'))
+        self.__config_setup_lan.set_vendor_class(self.__config.get('informationlan','vendorclass'))
+        self.__sendmsgs.send_dhcp_information(self.__config_setup_lan)
         
     def run_Lan(self):
         #self.__config_setup_lan_.flags_partA()
