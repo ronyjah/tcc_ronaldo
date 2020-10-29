@@ -191,6 +191,8 @@ class Test275b:
         test_max_time_lan = 300
         rs_sent = False
         while not self.__queue_lan.full():
+            if self.__dhcp_renew_done :
+                t_test1 = t_test1 + 1
             time.sleep(1)
             temporizador = temporizador + 1
             while self.__queue_lan.empty():
@@ -250,15 +252,16 @@ class Test275b:
                     return False     
             else:
                 if self.__dhcp_renew_done :
-                    logging.info('LAN: DHCP Renew concluido')
-                    self.set_status_lan('LAN: DHCP Renew concluido')
-                    if temporizador < test_max_time_lan:
-                        self.set_status_lan('LAN: DHCP Renew concluido. Enviando RS')
-                        logging.info('LAN: DHCP Renew concluido. Enviado RS')
-                        if temporizador % 10 == 0: 
+
+                    if t_test1 < 60:
+                        logging.info('(MELHORAR timer)LAN: DHCP Renew concluido. Aguardando 60 segundos. Tempo: '+ str(t_test1))
+                        self.set_status_lan('(MELHORAR TIMER)LAN: DHCP Renew concluido. Aguardando 60 segundos. Tempo: ' + str(t_test1))
+                    else:
+                        if t_test1 % 10 == 0: 
                             while not self.__queue_lan.empty():
                                 self.__queue_lan.get()
-
+                            logging.info('LAN: ENVIANDO RS APOS 60 segundos')
+                            self.set_status_lan(' ENVIANDO RS APOS 60 segundos')
                             self.rs_lan()
                             rs_sent = True
 
@@ -323,10 +326,10 @@ class Test275b:
         self.__t_lan =  Thread(target=self.run_Lan,name='LAN_Thread')
         self.__t_lan.start()
         
-        self.__packet_sniffer_wan = PacketSniffer('Test273b-WAN',self.__queue_wan,self,self.__config,self.__wan_device_tr1)
+        self.__packet_sniffer_wan = PacketSniffer('Test275b-WAN',self.__queue_wan,self,self.__config,self.__wan_device_tr1)
         self.__packet_sniffer_wan.start()
         
-        self.__packet_sniffer_lan = PacketSniffer('Test273b-LAN',self.__queue_lan,self,self.__config,self.__lan_device)
+        self.__packet_sniffer_lan = PacketSniffer('Test275b-LAN',self.__queue_lan,self,self.__config,self.__lan_device)
         test_lan = self.__packet_sniffer_lan.start()
         cache_wan = []
         self.set_flags()
@@ -381,8 +384,8 @@ class Test275b:
 
             else:
                 if not self.__finish_wan: 
-                    logging.info('WAN: Aguardando recebimento da mensagem Renew --Teste tomando muito tempo -- melhorar')
-                    self.set_status('WAN: Aguardando recebimento da mensagem Renew -- teste tomando muito tempo melhorar')
+                    logging.info('WAN: Setup 1.1 concluido. Executando parte  B --Teste tomando muito tempo -- melhorar')
+                    self.set_status('WAN: Setup 1.1 concluido. Executando parte B -- teste tomando muito tempo melhorar')
                     if pkt.haslayer(DHCP6_Renew):
                         self.dhcp_reply(pkt)
                         logging.info('WAN: Renew Recebido. Enviado DHCP REply')
