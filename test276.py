@@ -260,7 +260,12 @@ class Test276:
                 #     self.__fail_test = True
                 #     return False
 
-
+    def ra_wan(self):
+        self.__config_setup1_1.set_ether_src(self.__config.get('wan','ra_mac'))
+        self.__config_setup1_1.set_ether_dst(self.__config.get('multicast','all_mac_nodes'))
+        self.__config_setup1_1.set_ipv6_src(self.__config.get('wan','ra_address'))
+        self.__config_setup1_1.set_ipv6_dst(self.__config.get('multicast','all_nodes_addr'))
+        self.__sendmsgs.send_tr1_RA(self.__config_setup1_1)
                 
     def run(self):
         @self.__app.route("/WAN",methods=['GET'])
@@ -282,76 +287,67 @@ class Test276:
         time_over = False
         #time.sleep(11111)
         finish_wan = True
+        test_max_time = 300
+        temporizador = 0
         self.__config_setup1_1.set_pd_prefixlen(self.__config.get('t2.7.6','pd_prefixlen')) 
         self.__config_setup1_1.set_routerlifetime(self.__config.get('t2.7.6','routerlifetime')) 
         #self.__config_setup1_1.active_DHCP_no_IA_PD()
         while not self.__queue_wan.full():
             while self.__queue_wan.empty():
-                if t_test < 60:
-                    time.sleep(1)
-                    if t_test % 15 ==0:
-                        
-                        self.__config_setup1_1.set_ether_src(self.__config.get('wan','ra_mac'))
-                        self.__config_setup1_1.set_ether_dst(self.__config.get('multicast','all_mac_nodes'))
-                        self.__config_setup1_1.set_ipv6_src(self.__config.get('wan','ra_address'))
-                        self.__config_setup1_1.set_ipv6_dst(self.__config.get('multicast','all_nodes_addr'))
-                        self.__sendmsgs.send_tr1_RA(self.__config_setup1_1)
-                    t_test = t_test + 1
+                time.sleep(1)
+                if temporizador < test_max_time:
+                    temporizador = temporizador + 1
                 else:
-                    time_over = True
+                    self.set_status('WAN: Reprovado. Timeout')
+                    time.sleep(2)
+                    self.set_status('REPROVADO')
+                    logging.info('WAN: Reprovado. Timeout')
+                    #logging.info(routerlifetime)
+                    self.__packet_sniffer_lan.stop()
+                    self.__packet_sniffer_wan.stop()
+                    return False
+
+                if temporizador % 20 == 0:
+                    logging.info('WAN: Tempo limite do teste: '+str(test_max_time)+' segundos. Tempo: ' +str(temporizador))
+                    self.set_status('WAN: Tempo limite do teste: '+str(test_max_time)+' segundos. Tempo: ' +str(temporizador))
+
+                if temporizador < test_max_time:
+                    if temporizador % 15 == 0:
+                        self.send_ra()
+
             pkt = self.__queue_wan.get()
+
             cache_wan.append(pkt)
             wrpcap("WAN-2.7.6.cap",cache_wan)
+                self.set_status('WAN: Setup 1.1 em execução')
+                logging.info('WAN: Setup 1.1 em execução')            
             if not self.__config_setup1_1.get_setup1_1_OK():
 
                 if not self.__config_setup1_1.get_disapproved():
                     self.__config_setup1_1.run_setup1_1(pkt)
                 else:
-                    logging.info('Reprovado Teste 2.7.3a - Falha em completar o Common Setup 1.1 da RFC')
-                    self.__packet_sniffer_wan.stop() 
-                    return False
+                    logging.info('LAN: Reprovado Teste 2.7.6 - Falha em completar o setup 1.1')
+                    self.set_status_lan('Reprovado Teste 2.7.6 - Falha em completar o setup 1.1')
+                    time.sleep(2)
+                    self.set_status_lan('REPROVADO') # Mensagem padrão para o frontEnd atualizar Status
+                    self.__packet_sniffer_lan.stop()
+                    self.__finish_wan = True 
+                    return False   
 
             else:
                 if not self.__finish_wan: 
-                    print('WAN - Concluido')
-                    print('LAN RESULT')
-    #                 if not sent_reconfigure:
-    #                     time.sleep(25)
-    #                     print('aqui7')
-    #                     self.__config_setup1_1.set_ipv6_src(self.__config.get('wan','link_local_addr'))
-    #                     print('aqui8')
-    #                     self.__config_setup1_1.set_ipv6_dst(self.__config_setup1_1.get_local_addr_ceRouter())
-    #                     print('aqui10')
-    #                     self.__config_setup1_1.set_ether_src(self.__config.get('wan','link_local_mac'))
-    #                     print('aqui11')
-    #                     self.__config_setup1_1.set_ether_dst(self.__config_setup1_1.get_mac_ceRouter())
-    #                     print('aqui12')
-    #                     self.__config_setup1_1.set_dhcp_reconf_type(self.__config.get('t1.6.3','msg_type'))
-    #                     print('aqui13')
-    #                     self.__config_setup1_1.set_udp_sport('547')
-    #                     self.__config_setup1_1.set_udp_dport('546')
-    #                     self.__sendmsgs.send_dhcp_reconfigure(self.__config_setup1_1)
-    #                     print('aqui14')
-    #                     sent_reconfigure = True 
-                        
+                    if pkt.haslayer(ICMPv6EchoRequest):
 
-    #                 if pkt.haslayer(DHCP6_Renew):
-    #                     if not self.__dhcp_renew_done:
-    # #                        if self.__active_renew_dhcp:
-    #                         self.__config_setup1_1.set_mac_ceRouter(pkt[Ether].src)
-    #                         self.__config_setup1_1.set_local_addr_ceRouter(pkt[IPv6].src)
-    #                         self.__config_setup1_1.set_xid(pkt[DHCP6_Renew].trid)
-    #                         self.__config_setup1_1.set_ipv6_src(self.__config.get('wan','link_local_addr'))
-    #                         self.__config_setup1_1.set_ipv6_dst(pkt[IPv6].src)
-    #                         self.__config_setup1_1.set_ether_src(self.__config.get('wan','link_local_mac'))
-    #                         self.__config_setup1_1.set_ether_dst(pkt[Ether].src)
-    #                         self.__config_setup1_1.set_dhcp_preflft('100')
-    #                         self.__config_setup1_1.set_dhcp_validlft('200')
-    #                         self.__config_setup1_1.set_dhcp_plen('60')
-    #                         self.__config_setup1_1.set_prefix_addr(self.__config.get('setup1-1_advertise','ia_pd_address'))
-    #                         self.__sendmsgs.send_dhcp_reply_v3(self.__config_setup1_1)
-    #                         #self.__dhcp_ok = True
-    #                         self.__dhcp_renew_done = True
+                        self.__packet_sniffer_wan.stop()
+                        self.__packet_sniffer_lan.stop()
+
+
+                        self.set_status('Teste 2.7.6 - REPROVADO: Pacote ICMP Request com prefixo invalido foi encaminhado pelo roteador da LAN para WAN')
+                        time.sleep(2)
+                        self.set_status('REPROVADO') # Mensagem padrão para o frontEnd atualizar Status
+                        logging.info('Teste 2.7.6 - REPROVADO: Pacote ICMP Request com prefixo invalido foi encaminhado pelo roteador da LAN para WAN')
+
+                        return False
                 else:
                     self.__packet_sniffer_wan.stop()
                     if self.__fail_test:
