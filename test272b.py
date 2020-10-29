@@ -59,17 +59,17 @@ class Test272b:
 
 
     def set_flags(self):
-        self.__config_setup1_1.set_flag_M(self.__config.get('t1.6.6b','flag_m'))
-        self.__config_setup1_1.set_flag_0(self.__config.get('t1.6.6b','flag_o'))
-        self.__config_setup1_1.set_flag_chlim(self.__config.get('t1.6.6b','flag_chlim'))
-        self.__config_setup1_1.set_flag_L(self.__config.get('t1.6.6b','flag_l'))
-        self.__config_setup1_1.set_flag_A(self.__config.get('t1.6.6b','flag_a'))
-        self.__config_setup1_1.set_flag_R(self.__config.get('t1.6.6b','flag_r'))
-        self.__config_setup1_1.set_flag_prf(self.__config.get('t1.6.6b','flag_prf'))
+        self.__config_setup1_1.set_flag_M(self.__config.get('t2.7.2b','flag_m'))
+        self.__config_setup1_1.set_flag_0(self.__config.get('t2.7.2b','flag_o'))
+        self.__config_setup1_1.set_flag_chlim(self.__config.get('t2.7.2b','flag_chlim'))
+        self.__config_setup1_1.set_flag_L(self.__config.get('t2.7.2b','flag_l'))
+        self.__config_setup1_1.set_flag_A(self.__config.get('t2.7.2b','flag_a'))
+        self.__config_setup1_1.set_flag_R(self.__config.get('t2.7.2b','flag_r'))
+        self.__config_setup1_1.set_flag_prf(self.__config.get('t2.7.2b','flag_prf'))
         self.__config_setup1_1.set_validlifetime(self.__config.get('t2.7.2b','validlifetime'))
         self.__config_setup1_1.set_preferredlifetime(self.__config.get('t2.7.2b','preferredlifetime'))
-        self.__config_setup1_1.set_routerlifetime(self.__config.get('t1.6.6b','routerlifetime'))
-        self.__config_setup1_1.set_intervalo(self.__config.get('t1.6.6b','intervalo'))   
+        self.__config_setup1_1.set_routerlifetime(self.__config.get('t2.7.2b','routerlifetime'))
+        self.__config_setup1_1.set_intervalo(self.__config.get('t2.7.2b','intervalo'))   
 
         self.__config_setup1_1.set_dhcp_t1(self.__config.get('t2.7.2b','dhcp_t1'))
         self.__config_setup1_1.set_dhcp_t2(self.__config.get('t2.7.2b','dhcp_t2'))
@@ -96,62 +96,115 @@ class Test272b:
         def envia_lan():
             return self.get_status_lan()
         #self.__config_setup_lan_.flags_partA()
-        logging.info('Thread da LAN')
+
         t_test = 0
         sent_reconfigure = False
         time_over = False
         self.set_flags_lan()
         cache_lan = []
+        temporizador = 0
+        test_max_time_lan = 300 
+        
         while not self.__queue_lan.full():
             while self.__queue_lan.empty():
-                if t_test < 60:
-                    time.sleep(1)
-                    t_test = t_test + 1
-                else:
-                    time_over = True
+                time.sleep(1)
+                
+                if self.__config_setup1_1.get_setup1_1_OK():
+                    self.__config_setup_lan.set_setup_lan_start()
+                    if temporizador < test_max_time_lan:
+                        temporizador = temporizador + 1
+                    else:
+                        self.set_status_lan('LAN: Reprovado. Timeout')
+                        time.sleep(2)
+                        self.set_status_lan('REPROVADO')
+                        logging.info('LAN: Reprovado. Timeout')
+                        #logging.info(routerlifetime)
+                        self.__finish_wan = True 
+                        self.__fail_test = True
+                        self.__packet_sniffer_lan.stop()
+
+                        return False
+                    if temporizador % 20 == 0:
+
+                        logging.info('LAN: Tempo limite do teste: '+str(test_max_time_lan)+' segundos. Tempo: ' +str(temporizador))
+                        self.set_status_lan('LAN: Tempo limite do teste: '+str(test_max_time_lan)+' segundos. Tempo: ' +str(temporizador))
+
             pkt = self.__queue_lan.get()
+
             cache_lan.append(pkt)
             wrpcap("lan-2.7.2b.cap",cache_lan)
+
             if not self.__config_setup_lan.get_setup_OK():
                 if not self.__config_setup_lan.get_disapproved():
                     self.__config_setup_lan.run_setup1_1(pkt)
                 else:
-                    logging.info('Reprovado Teste 2.7.2b - Falha em completar o Common Setup 1.1 da RFC')
-                    self.__packet_sniffer_lan.stop() 
-                    return False       
+                    logging.info('LAN: Reprovado Teste 2.7.5a - Falha em completar o setup 1.1')
+                    self.set_status_lan('Reprovado Teste 2.7.5a - Falha em completar o setup 1.1')
+                    time.sleep(2)
+                    self.set_status_lan('REPROVADO') # Mensagem padrão para o frontEnd atualizar Status
+
+                    self.__packet_sniffer_lan.stop()
+                    self.__finish_wan = True 
+                    self.__fail_test = True
+                    return False   
             else:
+                logging.info('LAN:Setup LAN  Concluido')
+                self.set_status_lan('LAN:Setup LAN  Concluido')
                 logging.info('Setup LAN  Concluido')
                 #self.__packet_sniffer_wan.stop() 
                 r_plen_CeRouter = self.__config_setup_lan.get_r_plen_CeRouter()
                 r_rtlifetime_CeRouter = self.__config_setup_lan.get_r_lifetime_CeRouter()
                 #validlifetime = self.__config_setup_lan.get_validlifetime_CeRouter()
-                if r_plen_CeRouter == int(self.__config.get('t2.7.2a','pd_prefixlen')):
-                    logging.info('Aprovado Teste 2.7.2b r_plen_CeRouter é igual pd_prefixlen')
+                if r_plen_CeRouter == int(self.__config.get('t2.7.2b','pd_prefixlen')):
+                    logging.info('Aprovado parcial: Teste 2.7.2b router Prefix len do CeRouter é igual designado em RA')
+                    self.set_status_lan('Aprovado parcial: Teste 2.7.2b router Prefix len do CeRouter é igual designado em RA')
+
+                    
                     #self.__packet_sniffer_lan.stop()
                     #return True
-                else:                     
-                    logging.info('Reprovado -r_plen_CeRouter nao é igual pd_prefixlen')
+                else:
+                    print('Valor esperado:')                     
+                    print(self.__config.get('t2.7.2b','pd_prefixlen'))
+                    print('Valor lido:')   
                     logging.info(r_plen_CeRouter)
+                    logging.info('LAN: Reprovado Teste 2.7.2b router Prefix len do CeRouter NAO é igual designado em RA')
+                    self.set_status_lan('LAN: Reprovado Teste 2.7.2b router Prefix len do CeRouter NAO é igual designado em RA')
+                    time.sleep(2)
+                    self.set_status_lan('REPROVADO') # Mensagem padrão para o frontEnd atualizar Status
+
                     self.__packet_sniffer_lan.stop()
-                    return False
+                    self.__finish_wan = True 
+                    self.__fail_test = True
+                    return False   
 
                 if r_rtlifetime_CeRouter < int(self.__config.get('t2.7.2b','routerlifetime')):
-                    logging.info(' Teste 2.7.2b: r_rtlifetime_CeRouter OK. r_rtlifetime dentro do especificado no RA')
-                    #self.__packet_sniffer_lan.stop()
-                    #return True
+                    logging.info('Aprovado parcial: Teste 2.7.2b router Router Lifetime do CeRouter esta conforme valor designado em RA')
+                    self.set_status_lan('Aprovado parcial: Teste 2.7.2b router Router Lifetime do CeRouter esta conforme valor designado em RA')
+
+                    
                 else:                     
-                    logging.info(' Teste2.7.2b: Reprovado. preferredlifetime acima do especificado no RA')
+
                     logging.info(r_rtlifetime_CeRouter)
+                    logging.info('LAN: Reprovado Teste 2.7.2b  router Router Lifetime do CeRouter NAO é igual designado em RA')
+                    self.set_status_lan('LAN: Reprovado Teste 2.7.2b  router Router Lifetime do CeRouter NAO é igual designado em RA')
+                    time.sleep(2)
+                    self.set_status_lan('REPROVADO') # Mensagem padrão para o frontEnd atualizar Status
+
                     self.__packet_sniffer_lan.stop()
-                    return False
+                    self.__finish_wan = True 
+                    self.__fail_test = True
+                    return False   
 
-                logging.info('Aprovado Teste2.7.2b.')
-                self.__packet_sniffer_lan.stop()
-                return True
+                logging.info('Aprovado Teste2.7.2b. Valor de Router life time e prefix Length conforme designados.')
+                self.set_status_lan('Aprovado Teste2.7.2b. Valor de Router life time e prefix Length conforme designados. ')
+                time.sleep(2)
+                self.set_status_lan('APROVADO') # Mensagem padrão para o frontEnd atualizar Status
                 
-
-
-  
+                self.__packet_sniffer_lan.stop()
+                self.__finish_wan = True
+                self.__fail_test = False 
+                return True       
+                
 
 
     def run(self):
@@ -188,7 +241,8 @@ class Test272b:
             cache_wan.append(pkt)
             wrpcap("WAN-2.7.2b.cap",cache_wan)
             if not self.__config_setup1_1.get_setup1_1_OK():
-
+                logging.info('WAN: Setup 1.1 em execução')
+                self.set_status('WAN: Setup 1.1 em execução') 
                 if not self.__config_setup1_1.get_disapproved():
                     self.__config_setup1_1.run_setup1_1(pkt)
                 else:

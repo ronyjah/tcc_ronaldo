@@ -12,6 +12,8 @@ from test166a import Test166a
 from test166b import Test166b
 from test167 import Test167
 from test271a import Test271a
+from test272a import Test272a
+from test272b import Test272b
 from test273a import Test273a
 from test273b import Test273b
 from test273c import Test273c
