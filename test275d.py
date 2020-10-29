@@ -87,7 +87,66 @@ class Test275d:
     def get_status(self):
         return self.msg
 
+    def rs_lan(self):
+
+        self.__config_setup_lan.set_ipv6_src(self.__config.get('lan','lan_local_addr'))
+        self.__config_setup_lan.set_ether_src(self.__config.get('lan','mac_address'))
+        self.__config_setup_lan.set_ether_dst(self.__config.get('multicast','all_mac_routers'))
+        self.__config_setup_lan.set_ipv6_dst(self.__config.get('general','all_routers_address'))
+        self.__config_setup_lan.set_lla(self.__config.get('lan','mac_address'))
+        self.__sendmsgs.send_icmp_rs(self.__config_setup_lan)
         
+    def echo_request_lan(self):
+        #print('ENVIO REQUEST 1 LAN')
+
+        mac_global = self.__config_setup_lan.get_global_mac_ceRouter()
+        ip_global = self.__config_setup_lan.get_global_addr_ceRouter()
+        self.__config_setup_lan.set_ipv6_src(self.__config.get('lan','global_wan_addr'))
+        self.__config_setup_lan.set_ether_src(self.__config.get('lan','mac_address'))
+        self.__config_setup_lan.set_ether_dst(mac_global)
+        self.__config_setup_lan.set_ipv6_dst(ip_global)
+        self.__sendmsgs.send_echo_request_lan(self.__config_setup_lan)
+
+    def echo_request_lan_wrong_prefix(self):
+        #print('ENVIO REQUEST 1 LAN')
+        mac_global = self.__config_setup_lan.get_global_mac_ceRouter()
+        ip_global = self.__config_setup_lan.get_global_addr_ceRouter()
+        self.__config_setup_lan.set_ipv6_src(self.__config.get('t2.7.6','source_to_ping_tn1'))
+        self.__config_setup_lan.set_ether_src(self.__config.get('lan','mac_address'))
+        self.__config_setup_lan.set_ether_dst(mac_global)
+        self.__config_setup_lan.set_ipv6_dst(self.__config.get('wan','global_wan_addr'))
+        self.__sendmsgs.send_echo_request_lan(self.__config_setup_lan)
+
+    def icmp_na_wrong_prefix(self):
+        self.__config_setup_lan.set_ipv6_src(self.__config.get('lan','global_wan_addr'))
+        self.__config_setup_lan.set_ether_src(self.__config.get('lan','mac_address'))
+        self.__config_setup_lan.set_ether_dst(self.__config_setup_lan.get_global_mac_ceRouter())
+        self.__config_setup_lan.set_ipv6_dst(self.__config_setup_lan.get_global_addr_ceRouter())
+        self.__config_setup_lan.set_tgt(self.__config.get('t2.7.6','source_to_ping_tn1'))
+        self.__config_setup_lan.set_lla(self.__config.get('lan','mac_address'))
+        self.__sendmsgs.send_icmp_na_lan(self.__config_setup_lan)
+
+    def dhcp_information_lan(self):
+        #self.__config_setup_lan.set_setup_lan_start()
+        #print('#print ENVIO INFORMATION LAN')
+        self.__config_setup_lan.set_ipv6_src(self.__config.get('lan','lan_local_addr'))
+        self.__config_setup_lan.set_ether_src(self.__config.get('lan','mac_address'))
+        self.__config_setup_lan.set_ether_dst(self.__config.get('multicast','all_mac_routers'))
+        self.__config_setup_lan.set_ipv6_dst(self.__config.get('multicast','all_routers_addr'))
+        self.__config_setup_lan.set_xid(self.__config.get('informationlan','xid'))
+        #self.__config_setup_lan.set_lla(self.__config.get('lan','mac_address'))
+        self.__config_setup_lan.set_elapsetime(self.__config.get('informationlan','elapsetime'))
+        self.__config_setup_lan.set_vendor_class(self.__config.get('informationlan','vendorclass'))
+        self.__sendmsgs.send_dhcp_information(self.__config_setup_lan)
+
+    def ra_wan(self):
+        self.__config_setup1_1.set_ether_src(self.__config.get('wan','ra_mac'))
+        self.__config_setup1_1.set_ether_dst(self.__config.get('multicast','all_mac_nodes'))
+        self.__config_setup1_1.set_ipv6_src(self.__config.get('wan','ra_address'))
+        self.__config_setup1_1.set_ipv6_dst(self.__config.get('multicast','all_nodes_addr'))
+        self.__sendmsgs.send_tr1_RA(self.__config_setup1_1)
+
+
     def run_Lan(self):
         @self.__app.route("/LAN",methods=['GET'])
         def envia_lan():

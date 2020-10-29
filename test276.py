@@ -139,6 +139,12 @@ class Test276:
         self.__config_setup_lan.set_vendor_class(self.__config.get('informationlan','vendorclass'))
         self.__sendmsgs.send_dhcp_information(self.__config_setup_lan)
 
+    def ra_wan(self):
+        self.__config_setup1_1.set_ether_src(self.__config.get('wan','ra_mac'))
+        self.__config_setup1_1.set_ether_dst(self.__config.get('multicast','all_mac_nodes'))
+        self.__config_setup1_1.set_ipv6_src(self.__config.get('wan','ra_address'))
+        self.__config_setup1_1.set_ipv6_dst(self.__config.get('multicast','all_nodes_addr'))
+        self.__sendmsgs.send_tr1_RA(self.__config_setup1_1)
     def run_Lan(self):
 
         @self.__app.route("/LAN",methods=['GET'])
@@ -211,35 +217,28 @@ class Test276:
                     self.__fail = True
                     return False     
             else:
+                temporizador_ping = temporizador_ping + 1
+
                 if temporizador_ping % 5 ==0:
+
+                    print(temporizador_ping)
+
                     self.set_status_lan('LAN: Transmissão Echo Request IP global  com prefix origem incorreto')
                     logging.info('LAN: Transmissão Echo Request IP global  com prefix origem incorreto')
                     self.echo_request_lan_wrong_prefix()
 
+                if pkt[Ether].src == self.__config.get('lan','mac_address'):
 
-
-                if pkt[Ether].src == self.__config.get('lan','mac_address'): 
                     continue
 
-                if pkt.haslayer(ICMPv6EchoReply):
-                    logging.info('LAN: Reprovado Teste 2.7.6 - Recebido Echo Reply de Echo Request com prefixo origem nao atribuido')
-                    self.set_status_lan('LAN: Reprovado Teste 2.7.6 - Recebido Echo Reply de Echo Request com prefixo origem nao atribuido')
-                    time.sleep(2)
-                    self.set_status_lan('REPROVADO') # Mensagem padrão para o frontEnd atualizar Status
-
-                    self.__packet_sniffer_lan.stop()
-                    self.__finish_wan = True 
-                    self.__fail = True
-                    return False     
-
                 if pkt.haslayer(ICMPv6ND_NS):
+                    print('aqui3')
                     if pkt[ICMPv6ND_NS].tgt == self.__config.get('t2.7.6','source_to_ping_tn1'):
-                    self.set_status_lan('LAN: Transmissão ICMP NA IP global com prefix origem incorreto')
-                    logging.info('LAN: Transmissão Echo Request IP global com prefix origem incorreto')
-                        print(pkt[ICMPv6ND_NS].tgt)
-                        if not send_na_lan:
-                            self.icmp_na_wrong_prefix()
-                            send_na_lan = True
+
+                        self.set_status_lan('LAN: Transmissão ICMP NA IP global com prefix origem  nao atribuido')
+                        logging.info('LAN: Transmissão ICMP NA IP global com prefix origem  nao atribuido')
+                        self.icmp_na_wrong_prefix()
+
 
                 if pkt.haslayer(ICMPv6DestUnreach):
                     self.set_status('Teste 2.7.6- Pacote não foi encaminhado para WAN e CeRouter respondeu ao TN2 com Destino inalcançavel')
@@ -252,12 +251,26 @@ class Test276:
                     self.__fail_test = False 
                     return True
 
-    def ra_wan(self):
-        self.__config_setup1_1.set_ether_src(self.__config.get('wan','ra_mac'))
-        self.__config_setup1_1.set_ether_dst(self.__config.get('multicast','all_mac_nodes'))
-        self.__config_setup1_1.set_ipv6_src(self.__config.get('wan','ra_address'))
-        self.__config_setup1_1.set_ipv6_dst(self.__config.get('multicast','all_nodes_addr'))
-        self.__sendmsgs.send_tr1_RA(self.__config_setup1_1)
+
+
+
+
+
+
+                if pkt.haslayer(ICMPv6EchoReply):
+                    logging.info('LAN: Reprovado Teste 2.7.6 - Recebido Echo Reply de Echo Request com prefixo origem nao atribuido')
+                    self.set_status_lan('LAN: Reprovado Teste 2.7.6 - Recebido Echo Reply de Echo Request com prefixo origem nao atribuido')
+                    time.sleep(2)
+                    self.set_status_lan('REPROVADO') # Mensagem padrão para o frontEnd atualizar Status
+
+                    self.__packet_sniffer_lan.stop()
+                    self.__finish_wan = True 
+                    self.__fail = True
+                    return False     
+
+
+
+
                 
     def run(self):
         @self.__app.route("/WAN",methods=['GET'])
@@ -305,16 +318,16 @@ class Test276:
 
                 if temporizador < test_max_time:
                     if temporizador % 15 == 0:
-                        self.send_ra()
+                        self.ra_wan()
 
             pkt = self.__queue_wan.get()
 
             cache_wan.append(pkt)
             wrpcap("WAN-2.7.6.cap",cache_wan)
-                self.set_status('WAN: Setup 1.1 em execução')
-                logging.info('WAN: Setup 1.1 em execução')            
+         
             if not self.__config_setup1_1.get_setup1_1_OK():
-
+                self.set_status('WAN: Setup 1.1 em execução')
+                logging.info('WAN: Setup 1.1 em execução')   
                 if not self.__config_setup1_1.get_disapproved():
                     self.__config_setup1_1.run_setup1_1(pkt)
                 else:
@@ -323,24 +336,21 @@ class Test276:
                     time.sleep(2)
                     self.set_status_lan('REPROVADO') # Mensagem padrão para o frontEnd atualizar Status
                     self.__packet_sniffer_lan.stop()
-                    self.__finish_wan = True 
+                    self.__finish_wan = True
+                    self.__fail_test = True 
                     return False   
 
             else:
-                if not self.__finish_wan: 
-                    if pkt.haslayer(ICMPv6EchoRequest):
+                if pkt.haslayer(ICMPv6EchoRequest):
+                    self.__packet_sniffer_wan.stop()
 
-                        self.__packet_sniffer_wan.stop()
-                        self.__packet_sniffer_lan.stop()
+                    self.set_status('Teste 2.7.6 - REPROVADO: Pacote ICMP Request com prefixo invalido foi encaminhado pelo roteador da LAN para WAN')
+                    time.sleep(2)
+                    self.set_status('REPROVADO') # Mensagem padrão para o frontEnd atualizar Status
+                    logging.info('Teste 2.7.6 - REPROVADO: Pacote ICMP Request com prefixo invalido foi encaminhado pelo roteador da LAN para WAN')
 
-
-                        self.set_status('Teste 2.7.6 - REPROVADO: Pacote ICMP Request com prefixo invalido foi encaminhado pelo roteador da LAN para WAN')
-                        time.sleep(2)
-                        self.set_status('REPROVADO') # Mensagem padrão para o frontEnd atualizar Status
-                        logging.info('Teste 2.7.6 - REPROVADO: Pacote ICMP Request com prefixo invalido foi encaminhado pelo roteador da LAN para WAN')
-
-                        return False
-                else:
+                    return False
+                if self.__finish_wan: 
                     self.__packet_sniffer_wan.stop()
                     if self.__fail_test:
                         return False
