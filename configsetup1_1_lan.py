@@ -390,6 +390,9 @@ class ConfigSetup1_1_Lan:
         self.__lla = valor
     def set_setup_lan_start(self):
         self.__setup_lan_start = True
+
+
+
     def run_setup1_1(self,pkt):
         
 
@@ -450,7 +453,7 @@ class ConfigSetup1_1_Lan:
                 self.send_solicit = True
                 self.__setup1_1_OK = True
                 #return
-            print('CHegou RA na LAN')
+
             if pkt.haslayer(ICMPv6NDOptRouteInfo):
                 self.__r_prefixaddr_CeRouter = pkt[ICMPv6NDOptRouteInfo].prefix
                 self.__r_plen_CeRouter = pkt[ICMPv6NDOptRouteInfo].plen
