@@ -179,7 +179,7 @@ class SendMsgs:
 
     def icmpv6_na_lan(self,test=None):
         return ICMPv6ND_NA(S=1,\
-                            R=1,\
+                            R=0,\
                             O=1,\
                 tgt=test.get_tgt())
 
@@ -364,6 +364,9 @@ class SendMsgs:
             self.echo_request()/\
             Raw(load='abcdef'),\
             iface=self.__lan_device,inter=1,verbose=False)
+
+
+
 
 
     def send_echo_reply(self,fields=None,contador=None):

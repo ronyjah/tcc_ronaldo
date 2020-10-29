@@ -180,7 +180,8 @@ class Test276:
                         logging.info('LAN: Reprovado. Timeout')
                         #logging.info(routerlifetime)
                         self.__packet_sniffer_lan.stop()
-                        self.__packet_sniffer_wan.stop()
+                        self.__finish_wan = True 
+                        self.__fail = True
                         return False
                     if temporizador_lan % 20 == 0:
                         logging.info('LAN: Tempo limite do teste: '+str(test_max_time_lan)+' segundos. Tempo: ' +str(temporizador_lan))
