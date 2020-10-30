@@ -325,7 +325,12 @@ class Test274a:
                 logging.info('WAN: Checando o recebimento de Renew')
                 self.set_status('WAN: Checando o recebimento de Renew')
                 self.__config_setup1_1.check_layers(pkt)
-     
+                if self.__finish_wan: 
+                    self.__packet_sniffer_wan.stop()
+                    if self.__fail_test:
+                        return False
+                    else:
+                        return True
         self.__packet_sniffer_wan.stop()
         return False
      

@@ -333,10 +333,10 @@ class Test273c:
 
                 if self.__finish_wan: 
                     self.__packet_sniffer_wan.stop()
-                if self.__fail_test:
-                    return False
-                else:
-                    return True
+                    if self.__fail_test:
+                        return False
+                    else:
+                        return True
 
         self.__packet_sniffer_wan.stop()
         return False

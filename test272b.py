@@ -150,7 +150,7 @@ class Test272b:
             else:
                 logging.info('LAN:Setup LAN  Concluido')
                 self.set_status_lan('LAN:Setup LAN  Concluido')
-                logging.info('Setup LAN  Concluido')
+
                 #self.__packet_sniffer_wan.stop() 
                 r_plen_CeRouter = self.__config_setup_lan.get_r_plen_CeRouter()
                 r_rtlifetime_CeRouter = self.__config_setup_lan.get_r_lifetime_CeRouter()
@@ -237,9 +237,17 @@ class Test272b:
                     t_test = t_test + 1
                 else:
                     time_over = True
+                if t_test % 10 ==0:
+                    
+                    logging.info('WAN: Envio de RA periódico')
+                    self.set_status('WAN: Envio de RA periódico')
+                    self.ra_wan()  
+
             pkt = self.__queue_wan.get()
+
             cache_wan.append(pkt)
             wrpcap("WAN-2.7.2b.cap",cache_wan)
+
             if not self.__config_setup1_1.get_setup1_1_OK():
                 logging.info('WAN: Setup 1.1 em execução')
                 self.set_status('WAN: Setup 1.1 em execução') 
@@ -251,9 +259,14 @@ class Test272b:
                     return False
 
             else: 
-                if not finish_wan:
+                logging.info('WAN: Setup 1.1 Concluido')
+                self.set_status('WAN: Setup 1.1 Concluido') 
+                if self.__finish_wan: 
                     self.__packet_sniffer_wan.stop()
-                    finish_wan = True 
+                    if self.__fail_test:
+                        return False
+                    else:
+                        return True
    
         self.__packet_sniffer_wan.stop()
         return False

@@ -406,7 +406,8 @@ class Test275c:
                     self.set_status('REPROVADO') # Mensagem padrão para o frontEnd atualizar Status
                     self.__packet_sniffer_lan.stop()
                     self.__finish_wan = True
-                    self.__fail_test = True 
+                    self.__fail_test = True
+                    return False 
             else:
                 if not self.__finish_wan: 
 

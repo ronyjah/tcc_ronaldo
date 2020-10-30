@@ -392,7 +392,7 @@ class ConfigSetup1_1_Lan:
         self.__setup_lan_start = True
 
 
-
+        
     def run_setup1_1(self,pkt):
         
 
@@ -439,7 +439,8 @@ class ConfigSetup1_1_Lan:
                 self.__sendmsgssetup1_1.send_icmp_na_lan(self)
         
 
-
+        print('chegou RA PRA ESSE TESTE')
+        pkt.show()
         if pkt.haslayer(ICMPv6ND_RA):
             self.__routerlifetime_CeRouter = pkt[ICMPv6ND_RA].routerlifetime
             if pkt.haslayer(ICMPv6NDOptPrefixInfo):
@@ -453,7 +454,7 @@ class ConfigSetup1_1_Lan:
                 self.send_solicit = True
                 self.__setup1_1_OK = True
                 #return
-
+            print('CHegou RA na LAN')
             if pkt.haslayer(ICMPv6NDOptRouteInfo):
                 self.__r_prefixaddr_CeRouter = pkt[ICMPv6NDOptRouteInfo].prefix
                 self.__r_plen_CeRouter = pkt[ICMPv6NDOptRouteInfo].plen

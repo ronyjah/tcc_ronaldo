@@ -12,6 +12,8 @@ from test166a import Test166a
 from test166b import Test166b
 from test167 import Test167
 from test271a import Test271a
+from test271b import Test271b
+from test271c import Test271c
 from test272a import Test272a
 from test272b import Test272b
 from test273a import Test273a
@@ -206,6 +208,11 @@ class CeRouter(Profile):
                 self.add_step(Test271b(self.__config,app))
                 self.active = True
                 return 'Test RFC 7084 Item: Test2.7.1.b'
+
+            elif test == 'Test271c':
+                self.add_step(Test271c(self.__config,app))
+                self.active = True
+                return 'Test RFC 7084 Item: Test2.7.1.c'
 
             elif test == 'Test167':
                 self.add_step(Test167(self.__config,app))
