@@ -38,26 +38,39 @@ class Test271a:
         self.__all_nodes_addr = self.__config.get('multicast','all_nodes_addr')
         self.__test_desc = self.__config.get('tests','2.7.1a')
         self.__t_lan = None
-
+        self.__finish_wan = False
+        self.__fail_test = False
         self.msg = self.__config.get('tests','2.7.1a')
         self.msg_lan =self.__config.get('tests','2.7.1a')
 
         self.__config_setup_lan = ConfigSetup1_1_Lan(self.__config,self.__lan_device)
 
+    def ra_wan(self):
+        self.__config_setup1_1.set_ether_src(self.__config.get('wan','ra_mac'))
+        self.__config_setup1_1.set_ether_dst(self.__config.get('multicast','all_mac_nodes'))
+        self.__config_setup1_1.set_ipv6_src(self.__config.get('wan','ra_address'))
+        self.__config_setup1_1.set_ipv6_dst(self.__config.get('multicast','all_nodes_addr'))
+        self.__sendmsgs.send_tr1_RA(self.__config_setup1_1)
+    def rs_lan(self):
 
-
+        self.__config_setup_lan.set_ipv6_src(self.__config.get('lan','lan_local_addr'))
+        self.__config_setup_lan.set_ether_src(self.__config.get('lan','mac_address'))
+        self.__config_setup_lan.set_ether_dst(self.__config.get('multicast','all_mac_routers'))
+        self.__config_setup_lan.set_ipv6_dst(self.__config.get('general','all_routers_address'))
+        self.__config_setup_lan.set_lla(self.__config.get('lan','mac_address'))
+        self.__sendmsgs.send_icmp_rs(self.__config_setup_lan)
     def set_flags(self):
-        self.__config_setup1_1.set_flag_M(self.__config.get('t1.6.6b','flag_m'))
-        self.__config_setup1_1.set_flag_0(self.__config.get('t1.6.6b','flag_o'))
-        self.__config_setup1_1.set_flag_chlim(self.__config.get('t1.6.6b','flag_chlim'))
-        self.__config_setup1_1.set_flag_L(self.__config.get('t1.6.6b','flag_l'))
-        self.__config_setup1_1.set_flag_A(self.__config.get('t1.6.6b','flag_a'))
-        self.__config_setup1_1.set_flag_R(self.__config.get('t1.6.6b','flag_r'))
-        self.__config_setup1_1.set_flag_prf(self.__config.get('t1.6.6b','flag_prf'))
+        self.__config_setup1_1.set_flag_M(self.__config.get('t2.7.1a','flag_m'))
+        self.__config_setup1_1.set_flag_0(self.__config.get('t2.7.1a','flag_o'))
+        self.__config_setup1_1.set_flag_chlim(self.__config.get('t2.7.1a','flag_chlim'))
+        self.__config_setup1_1.set_flag_L(self.__config.get('t2.7.1a','flag_l'))
+        self.__config_setup1_1.set_flag_A(self.__config.get('t2.7.1a','flag_a'))
+        self.__config_setup1_1.set_flag_R(self.__config.get('t2.7.1a','flag_r'))
+        self.__config_setup1_1.set_flag_prf(self.__config.get('t2.7.1a','flag_prf'))
         self.__config_setup1_1.set_validlifetime(self.__config.get('t2.7.1a','validlifetime'))
         self.__config_setup1_1.set_preferredlifetime(self.__config.get('t2.7.1a','preferredlifetime'))
-        self.__config_setup1_1.set_routerlifetime(self.__config.get('t1.6.6b','routerlifetime'))
-        self.__config_setup1_1.set_intervalo(self.__config.get('t1.6.6b','intervalo'))   
+        self.__config_setup1_1.set_routerlifetime(self.__config.get('t2.7.1a','routerlifetime'))
+        self.__config_setup1_1.set_intervalo(self.__config.get('t2.7.1a','intervalo'))   
 
         self.__config_setup1_1.set_dhcp_t1(self.__config.get('t2.7.1a','dhcp_t1'))
         self.__config_setup1_1.set_dhcp_t2(self.__config.get('t2.7.1a','dhcp_t2'))

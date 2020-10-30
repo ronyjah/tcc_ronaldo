@@ -39,8 +39,9 @@ class Test275c:
         self.__test_desc = self.__config.get('tests','2.7.5c')
         self.__t_lan = None
         self.__finish_wan = False
-        self.__dhcp_renew_done = False
         self.__fail_test = False
+        self.__dhcp_renew_done = False
+
         self.msg = self.__config.get('tests','2.7.5c')
         self.msg_lan =self.__config.get('tests','2.7.5c')
         self.__config_setup_lan = ConfigSetup1_1_Lan(self.__config,self.__lan_device)
