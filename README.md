@@ -9,7 +9,7 @@ The Setup and steps for each test is described on Document: [Conformace Scenario
 git clone https://github.com/ronyjah/tcc_ronaldo
 cd tcc_ronaldo
 sudo apt update
-sudo python-3 pip
+sudo python3-pip
 source venv/bin/activate
 pip3 install -r requirements.txt
 ```
