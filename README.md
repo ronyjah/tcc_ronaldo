@@ -25,7 +25,7 @@ source venv/bin/activate
 python3 __main__.py -c .
 ```
 5. Open the file **index.html** with google-chrome or Firefox and click in Run to execute the test.
-6. For each test: Reboot the router or remake the WAN configuration with IPoE auto, DHCPv6 client enable and request prefix.
+6. For each test: Reboot the router or remake the WAN configuration with IPoE auto, DHCPv6 client, request prefix and **refresh the browser**.
 7. The software does not support yet sequencial tests. To do a new test, restart the python script (Ctrl+C some time is enough to stop) and Run the new test in Web interface.
 8. After finish test, acess menu **Capture**(ToDo) to download captures files. The captures of test is saved on project folder.
 
@@ -33,12 +33,13 @@ python3 __main__.py -c .
 
 ### ToDo
 - [ ] User Interface - **progress**
-- [x] automated pcap capture
+- [x] automated pcap capture.
 
 ### Bugs List:
-- [ ] Finish test automatically
-- [ ] Support sequential test
-- [ ] Show captures files in Web interface
+- [ ] Finish test automatically.
+- [ ] Support sequential test.
+- [ ] Show captures files in Web interface.
+- [ ] Sequential test does not  update the button correctly.
 
 ### List tests:
 The basic requeriments to Routers IPv6 conformance and cover by RFC 7084 protocol  tester
