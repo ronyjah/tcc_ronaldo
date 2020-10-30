@@ -24,8 +24,14 @@ pip3 install -r requirements.txt
 source venv/bin/activate
 python3 __main__.py -c .
 ```
-5. The file **index.html** with google-chrome or Firefox and click in Run to execute the test;
-6. After finish test acess menu **Capture** to download pcap files of test;
+5. Open the file **index.html** with google-chrome or Firefox and click in Run to execute the test.
+6. Restart de router, make or remake the WAN with IPoE auto, DHCPv6 client enable and request prefix.
+6. The software does not support yet sequencial tests. To do a new test, restart the python script (Ctrl+C some time is enough to stop) and Run the new test in Web interface.
+6. After finish test, acess menu **Capture**(ToDo) to download captures files. The captures of test is saved on project folder.
+
+### Bugs List:
+- [ ] Finish test automatically
+- [ ] Support sequential
 
 ### List tests:
 The basic requeriments to Routers IPv6 conformance and cover by RFC 7084 protocol  tester
