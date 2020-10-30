@@ -29,9 +29,15 @@ python3 __main__.py -c .
 7. The software does not support yet sequencial tests. To do a new test, restart the python script (Ctrl+C some time is enough to stop) and Run the new test in Web interface.
 8. After finish test, acess menu **Capture**(ToDo) to download captures files. The captures of test is saved on project folder.
 
+
+### ToDo
+- [ ] User Interface - **progress**
+- [x] automated pcap capture
+
 ### Bugs List:
 - [ ] Finish test automatically
 - [ ] Support sequential test
+- [] Show captures files in Web interface
 
 ### List tests:
 The basic requeriments to Routers IPv6 conformance and cover by RFC 7084 protocol  tester
@@ -79,6 +85,4 @@ The basic requeriments to Routers IPv6 conformance and cover by RFC 7084 protoco
 - [x] 3.2.3: FORWARDING LOOPS PART B
 - [x] 3.2.4: UNIQUE LOCAL ADDRESS FORWARDING
 
-### ToDo
-- [ ] User Interface
-- [ ] automated pcap capture
+
