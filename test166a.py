@@ -38,8 +38,8 @@ class Test166a:
         self.__link_local_addr = self.__config.get('wan','link_local_addr')
         self.__all_nodes_addr = self.__config.get('multicast','all_nodes_addr')
         self.__test_desc = self.__config.get('tests','1.6.6a')
-        
-
+        self.msg_lan = self.__config.get('tests','1.6.6a')
+        self.msg = self.__config.get('tests','1.6.6a')
     def get_addr_ceRouter(self):
         return self.addr_ceRouter
     
@@ -58,8 +58,29 @@ class Test166a:
         self.__config_setup1_1.set_preferredlifetime(self.__config.get('t1.6.6a','preferredlifetime'))
         self.__config_setup1_1.set_routerlifetime(self.__config.get('t1.6.6a','routerlifetime'))
         self.__config_setup1_1.set_intervalo(self.__config.get('t1.6.6a','intervalo'))    
+        self.__config_setup1_1.set_pd_prefixlen(self.__config.get('t1.6.6a','pd_prefixlen'))
+    def set_status_lan(self,v):
+        self.msg_lan = v
+
+    def get_status_lan(self):
+        return self.msg_lan
+
+
+    def set_status(self,v):
+        self.msg = v
+
+    def get_status(self):
+        return self.msg
+
+
 
     def run(self):
+        @self.__app.route("/LAN",methods=['GET'])
+        def envia_lan():
+            return self.get_status_lan()
+        @self.__app.route("/WAN",methods=['GET'])
+        def enviawan():
+            return self.get_status()
         self.__packet_sniffer_wan = PacketSniffer('test166a',self.__queue_wan,self,self.__config,self.__wan_device_tr1)
         self.__packet_sniffer_wan.start()
 
@@ -75,23 +96,33 @@ class Test166a:
         cache_wan = []
         while not self.__queue_wan.full():
             while self.__queue_wan.empty():
-                if t_test < 60:
+                if t_test < 120:
                     time.sleep(1)
                     t_test = t_test + 1
+                    logging.info('WAN: Tempo limite de teste 120 seg. Tempo atual: ' +str(t_test))
+                    self.set_status('WAN: Tempo limite de teste 120 seg. Tempo atual:  ' +str(t_test))
                 else:
-                    time_over = True
+                    self.__packet_sniffer_wan.stop() 
+                    logging.info('Reprovado: Teste 1.6.6a- Cerouter com transmitiou Solicit dentro do tempo de Teste')
+                    self.set_status('Reprovado: Teste 1.6.6a- Cerouter com transmitiou Solicit dentro do tempo de Teste')
+                    time.sleep(2)
+                    self.set_status('REPROVADO') # Mensagem padrão para o frontEnd atualizar Status
+                    
+                    self.__packet_sniffer_wan.stop()
+                    return False
             pkt = self.__queue_wan.get()
             #if not self.__ND_local_OK:
-
+            cache_wan.append(pkt)
+            wrpcap("wan-1.6.6a.cap",cache_wan)
             if pkt.haslayer(ICMPv6ND_NS):
 
                 if pkt[ICMPv6ND_NS].tgt == '::':
 
-                    pass
+                    continue
                 if pkt[IPv6].src == self.__config.get('wan','link_local_addr'):
-                    pass
+                    continue
                 if pkt[IPv6].src == self.__config.get('wan','global_wan_addr'):
-                    pass
+                    continue
                 if pkt[IPv6].src == '::':
                     if pkt[ICMPv6ND_NS].tgt != '::':
 
@@ -106,9 +137,20 @@ class Test166a:
                         pkt.show()
 
             if pkt.haslayer(ICMPv6ND_RS) and not self.__ND_local_OK:
-                return False
+                logging.info('WAN: Reprovado Teste 1.6.6a - Nao Recebeu ICMP NS antes do RS')
+                self.set_status('WAN: Reprovado Teste 1.6.6a - Nao Recebeu ICMP NS antes do RS')
+                time.sleep(2)
+                self.set_status('REPROVADO') # Mensagem padrão para o frontEnd atualizar Status
+                self.__packet_sniffer_wan.stop()
+                return False  
+
             else:
+
+
+
                 if not send_ns:
+                    logging.info('WAN: TR1 Enviando ICMP NS')
+                    self.set_status('WAN: TR1 Enviando ICMP NS')
                     self.__config_setup1_1.set_ether_src(self.__config.get('wan','link_local_mac'))
                     self.__config_setup1_1.set_ether_dst(self.__config.get('multicast','all_mac_nodes'))
                     self.__config_setup1_1.set_ipv6_src(self.__config.get('wan','global_wan_addr'))
@@ -118,7 +160,9 @@ class Test166a:
                     self.__sendmsgs.send_icmp_ns(self.__config_setup1_1)
                     send_ns = True
                     continue
-                if send_ns and not send_ra:       
+                if send_ns and not send_ra:   
+                    logging.info('WAN: TR1 Enviando ICMP RA com Flag M para um e Flag O para zero')
+                    self.set_status('WAN: TR1 Enviando ICMP RA com Flag M para um e Flag O para zero')    
                     self.__config_setup1_1.set_flag_M("1")
                     self.__config_setup1_1.set_flag_O("0")
                     self.__config_setup1_1.set_ether_src(self.__config.get('wan','ra_mac'))
@@ -132,10 +176,24 @@ class Test166a:
 
                 if send_ra:
                     if pkt.haslayer(DHCP6_Solicit):
-                        if pkt.haslayer(DHCP6OptIA_NA):
+                        logging.info('WAN: Recebido DHCP Solicit. Verificando se contem ICMP IA_PD')
+                        self.set_status('WAN: Recebido DHCP Solicit. Verificando se contem ICMP IA_PD')
+                        if pkt.haslayer(DHCP6OptIA_PD):
+
+                            logging.info('WAN: APROVADO Teste 1.6.6a - Roteador Enviou solicit com Option IA_PD')
+                            self.set_status('WAN: APROVADO Teste 1.6.6a - Roteador Enviou solicit com Option IA_PD')
+                            time.sleep(2)
+                            self.set_status('APROVADO') # Mensagem padrão para o frontEnd atualizar Status
+                            self.__packet_sniffer_wan.stop()
                             return True
                         else:
-                            return False 
+
+                            logging.info('WAN: Reprovado Teste 1.6.6b - Roteador Enviou solicit sem Option IA_NA')
+                            self.set_status('WAN: Reprovado Teste 1.6.6b - Falha em completar o setup LAN')
+                            time.sleep(2)
+                            self.set_status('REPROVADO') # Mensagem padrão para o frontEnd atualizar Status
+                            self.__packet_sniffer_wan.stop()
+                            return False  
 
    
         self.__packet_sniffer_wan.stop()

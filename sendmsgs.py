@@ -261,6 +261,7 @@ class SendMsgs:
         return DHCP6OptOptReq(reqopts=[17,23,24,32]) 
 
     def send_tr1_RA(self,fields=None):
+        print('RA1')
         sendp(self.ether(fields)/\
             self.ipv6(fields)/\
             self.icmpv6_ra(fields)/\
@@ -268,6 +269,7 @@ class SendMsgs:
             iface=self.__wan_device_tr1,inter=1,verbose=False)
 
     def send_tr1_RA2(self,fields=None):
+        print('RA2')
         sendp(self.ether(fields)/\
             self.ipv6(fields)/\
             self.icmpv6_ra2(fields)/\

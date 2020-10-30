@@ -36,8 +36,9 @@ class Test163b:
         self.__link_local_addr = self.__config.get('wan','link_local_addr')
         self.__all_nodes_addr = self.__config.get('multicast','all_nodes_addr')
         self.__test_desc = self.__config.get('tests','1.6.3b')
-
-
+        self.msg = self.__config.get('tests','1.6.3b')
+        self.msg_lan = self.__config.get('tests','1.6.3b')
+        self.addr_ceRouter = None
     def set_flags(self):
         self.__config_setup1_1.set_flag_M(self.__config.get('t1.6.3','flag_m'))
         self.__config_setup1_1.set_flag_0(self.__config.get('t1.6.3','flag_o'))
@@ -46,12 +47,49 @@ class Test163b:
         self.__config_setup1_1.set_flag_A(self.__config.get('t1.6.3','flag_a'))
         self.__config_setup1_1.set_flag_R(self.__config.get('t1.6.3','flag_r'))
         self.__config_setup1_1.set_flag_prf(self.__config.get('t1.6.3','flag_prf'))
+
         self.__config_setup1_1.set_validlifetime(self.__config.get('t1.6.3','validlifetime'))
         self.__config_setup1_1.set_preferredlifetime(self.__config.get('t1.6.3','preferredlifetime'))
         self.__config_setup1_1.set_routerlifetime(self.__config.get('t1.6.3','routerlifetime'))
         self.__config_setup1_1.set_intervalo(self.__config.get('t1.6.3','intervalo'))
+        self.__config_setup1_1.set_pd_prefixlen(self.__config.get('t1.6.3','pd_prefixlen'))
+
+        self.__config_setup1_1.set_prefix_addr(self.__config.get('setup1-1_advertise','ia_pd_address'))
+        self.__config_setup1_1.set_dhcp_t1(self.__config.get('t1.6.3','dhcp_t1'))
+        self.__config_setup1_1.set_dhcp_t2(self.__config.get('t1.6.3','dhcp_t2'))
+        self.__config_setup1_1.set_dhcp_preflft(self.__config.get('t1.6.3','dhcp_preflft'))
+        self.__config_setup1_1.set_dhcp_validlft(self.__config.get('t1.6.3','dhcp_validlft'))
+        self.__config_setup1_1.set_dhcp_plen(self.__config.get('t1.6.3','dhcp_plen'))
+    def get_addr_ceRouter(self):
+        return self.addr_ceRouter
+    
+    def get_mac_ceRouter(self):
+        return self.mac_ceRouter
+
+    def set_status_lan(self,v):
+        self.msg_lan = v
+
+    def get_status_lan(self):
+        return self.msg_lan
+
+
+    def set_status(self,v):
+        self.msg = v
+
+    def get_status(self):
+        return self.msg
 
     def run(self):
+        @self.__app.route("/LAN",methods=['GET'])
+        def envia_lan():
+
+            return self.get_status_lan()
+
+        @self.__app.route("/WAN",methods=['GET'])
+        def enviawan():
+
+            return self.get_status()
+
         self.__packet_sniffer_wan = PacketSniffer('test163b',self.__queue_wan,self,self.__config,self.__wan_device_tr1)
         self.__config_setup1_1.flags_partA()
         self.__packet_sniffer_wan.start()
@@ -59,27 +97,51 @@ class Test163b:
         logging.info(self.__test_desc)
         t_test = 0
         sent_reconfigure = False
+        time_over = False
 
-        time_over = False        
+        t_test1 = 0
+        t_test2 = 0
+
+        cache_wan = []
+      
         while not self.__queue_wan.full():
             while self.__queue_wan.empty():
-                if t_test < 3000:
+                if sent_reconfigure:
+                    if t_test2 < 3:
+                        time.sleep(1)
+                        t_test2 = t_test2 + 1
+                    else:
+                        time_over = True
+                if t_test < 120:
                     time.sleep(1)
                     t_test = t_test + 1
+                    if t_test % 20 == 0:
+                        logging.info('WAN: Tempo limite de teste 120 seg. Tempo atual: ' +str(t_test))
+                        self.set_status('WAN: Tempo limite de teste 120 seg. Tempo atual:  ' +str(t_test))
                 else:
-                    time_over = True
+                    self.__packet_sniffer_wan.stop() 
+                    logging.info('Reprovado: Teste 1.6.3b- TImeout')
+                    self.set_status('Reprovado: Teste 1.6.3b TImeout')
+                    time.sleep(2)
+                    self.set_status('REPROVADO') # Mensagem padrão para o frontEnd atualizar Status
+                    return False
             pkt = self.__queue_wan.get()
+            cache_wan.append(pkt)
+            wrpcap("wan-1.6.3b.cap",cache_wan)
            
             if not self.__config_setup1_1.get_setup1_1_OK():
-
+                logging.info('WAN: Setup 1.1 em execução')
+                self.set_status('WAN: Setup 1.1 em execução') 
                 if not self.__config_setup1_1.get_disapproved():
                     self.__config_setup1_1.run_setup1_1(pkt)
-                    print('aqui')
+
                 else:
-                    print('aqui1')
-                    self.__packet_sniffer_wan.stop() 
-                    logging.info('Reprovado Teste 1.6.3.c - Falha em completar o Common Setup 1.1 da RFC')
-                    return False
+                    logging.info('WAN: Reprovado Teste 1.6.3b - Falha em completar o setup 1.1')
+                    self.set_status('Reprovado Teste 1.6.3b - Falha em completar o setup 1.1')
+                    time.sleep(2)
+                    self.set_status('REPROVADO') # Mensagem padrão para o frontEnd atualizar Status
+                    self.__packet_sniffer_wan.stop()
+                    return False  
 
                 #self.__config_setup1_1.run_setup1_1(pkt)
             else:
@@ -87,33 +149,40 @@ class Test163b:
 
                 # self.__config_setup1_1.set_xid()
                 if pkt.haslayer(DHCP6_Renew):
-                    print('aqui2')
+
                     logging.info(pkt.show())
-                    print('aqui3')
-                    self.__packet_sniffer_wan.stop()
-                    print('aqui33333')
-                    
-                    logging.info('Aprovado: Teste 1.6.3.b.')
+
+                    self.__packet_sniffer_wan.stop() 
+                    logging.info('Aprovado: Teste 1.6.3.b. recebeu DHCP Renew apos DHCP Reconfigure')
+                    self.set_status('Aprovado: Teste 1.6.3.b. recebeu DHCP Renew apos DHCP Reconfigure')
+                    time.sleep(2)
+                    self.set_status('APROVADO') # Mensagem padrão para o frontEnd atualizar Status
+
                     return True
 
                 elif time_over :
-                    print('aqui4')
-                    if not sent_reconfigure:
-                        print('aqui5')
-                        pass
-                        #self.__packet_sniffer_wan.stop()
-                        logging.info('Falha: Teste 1.6.3.b. Tempo finalizado e Não Enviou DHCP Reconfigure')
-                        return False
-                    else:
-                        print('aqui6')
-                        self.__packet_sniffer_wan.stop()
-                        logging.info('Reprovado: Teste 1.6.3.b. Tempo finalizado e Não recebeu DHCP6 Renew')
 
-                        return False
+                    if not sent_reconfigure:
+                        self.__packet_sniffer_wan.stop()
+                        logging.info('Falha: Teste 1.6.3.b. Tempo finalizado mas Não Enviou DHCP Reconfigure')
+                        self.set_status('Falha: Teste 1.6.3.b. Tempo finalizado mas Não Enviou DHCP Reconfigure')
+                        time.sleep(2)
+                        self.set_status('REPROVADO') # Mensagem padrão para o frontEnd atualizar Status
+
+                        return False 
+                    else:
+                        self.__packet_sniffer_wan.stop()
+                        logging.info('Falha: Teste 1.6.3.b. Tempo finalizado mas Não Recebeu Renew')
+                        self.set_status('Falha: Teste 1.6.3.b. Tempo finalizado mas Não Recebeu Renew')
+                        time.sleep(2)
+                        self.set_status('REPROVADO') # Mensagem padrão para o frontEnd atualizar Status
+
+                        return False 
 
                 if not sent_reconfigure:
                     time.sleep(3)
-
+                    logging.info('WAN: Envio de DHCP6 reconfigure')
+                    self.set_status('WAN:  - Envio de DHCP6 reconfigure')
                     self.__config_setup1_1.set_ipv6_src(self.__config.get('wan','link_local_addr'))
 
                     self.__config_setup1_1.set_ipv6_dst(self.__config_setup1_1.get_local_addr_ceRouter())

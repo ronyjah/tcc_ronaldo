@@ -356,7 +356,7 @@ class Test275c:
         self.__packet_sniffer_wan.start()
         
         self.__packet_sniffer_lan = PacketSniffer('Test273b-LAN',self.__queue_lan,self,self.__config,self.__lan_device)
-        test_lan = self.__packet_sniffer_lan.start()
+        self.__packet_sniffer_lan.start()
         cache_wan = []
         self.set_flags()
         logging.info(self.__test_desc)
@@ -364,7 +364,7 @@ class Test275c:
         sent_reconfigure = False
         time_over = False
         #time.sleep(11111)
-        finish_wan = True
+
         self.__config_setup1_1.set_pd_prefixlen(self.__config.get('t2.7.5c','pd_prefixlen')) 
         self.__config_setup1_1.set_routerlifetime(self.__config.get('t2.7.5c','routerlifetime')) 
         test_max_time = 300

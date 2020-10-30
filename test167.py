@@ -39,7 +39,8 @@ class Test167:
         self.__test_desc = self.__config.get('tests','1.6.7')
         self.__finish_wan = False
         self.__fail_test = False
-
+        self.msg =self.__config.get('tests','1.6.7')
+        self.msg_lan = self.__config.get('tests','1.6.7')
     def set_flags(self):
         self.__config_setup1_1.set_flag_M(self.__config.get('t1.6.6b','flag_m'))
         self.__config_setup1_1.set_flag_0(self.__config.get('t1.6.6b','flag_o'))
@@ -53,9 +54,27 @@ class Test167:
         self.__config_setup1_1.set_routerlifetime(self.__config.get('t1.6.6b','routerlifetime'))
         self.__config_setup1_1.set_intervalo(self.__config.get('t1.6.6b','intervalo'))    
 
+    def set_status_lan(self,v):
+        self.msg_lan = v
+
+    def get_status_lan(self):
+        return self.msg_lan
+
+
+    def set_status(self,v):
+        self.msg = v
+
+    def get_status(self):
+        return self.msg
 
 
     def run(self):
+        @self.__app.route("/LAN",methods=['GET'])
+        def envia_lan():
+            return self.get_status_lan()
+        @self.__app.route("/WAN",methods=['GET'])
+        def enviawan():
+            return self.get_status()
         self.__packet_sniffer_wan = PacketSniffer('test167',self.__queue_wan,self,self.__config,self.__wan_device_tr1)
         self.__packet_sniffer_wan.start()
         self.set_flags()
@@ -69,10 +88,18 @@ class Test167:
                 if t_test < 60:
                     time.sleep(1)
                     t_test = t_test + 1
-                    logging.info('LAN: Tempo total de buscar por mensagens de roteamento dinamico Tempo 60 seg. Tempo atual ' +str(t_test))
-                    self.set_status_lan('LAN: Tempo total de buscar por mensagens de roteamento dinamico Tempo 60 seg. Tempo atual ' +str(t_test)))
+                    logging.info('LAN: Tempo  de busca por mensagens de roteamento dinamico Tempo 60 seg. Tempo atual: ' +str(t_test))
+                    self.set_status('LAN: Tempo  de busca por mensagens de roteamento dinamico Tempo 60 seg. Tempo atual: ' +str(t_test))
                 else:
-                    time_over = True
+                    self.__packet_sniffer_wan.stop() 
+                    logging.info('Aprovado: Teste 1.6.7-Nao houveram mensagem de roteamento dinâmico durante o período de teste')
+                    self.set_status('Aprovado: Teste 1.6.7-Nao houveram mensagem de roteamento dinâmico durante o período de teste')
+                    time.sleep(2)
+                    self.set_status('APROVADO') # Mensagem padrão para o frontEnd atualizar Status
+                    
+                    self.__packet_sniffer_wan.stop()
+
+                    return True     
             pkt = self.__queue_wan.get()
 
             if not self.__config_setup1_1.get_setup1_1_OK():
@@ -165,7 +192,7 @@ class Test167:
                     return False  
                 if pkt.haslayer(OSPFv3_Router_LSA):
                     logging.info(pkt.show())
-                     logging.info('WAN: Reprovado Teste 1.6.7-OSPFv3_Router_LSA')
+                    logging.info('WAN: Reprovado Teste 1.6.7-OSPFv3_Router_LSA')
                     self.set_status('WAN: Reprovado Teste 1.6.7-OSPFv3_Router_LSA')
                     time.sleep(2)
                     self.set_status('REPROVADO') # Mensagem padrão para o frontEnd atualizar Status
@@ -175,9 +202,9 @@ class Test167:
                 elif time_over :
                     self.__packet_sniffer_wan.stop() 
                     logging.info('Aprovado: Teste 1.6.7-Nao houveram mensagem de roteamento dinâmico durante o período de teste')
-                    self.set_status_lan('Aprovado: Teste 1.6.7-Nao houveram mensagem de roteamento dinâmico durante o período de teste')
+                    self.set_status('Aprovado: Teste 1.6.7-Nao houveram mensagem de roteamento dinâmico durante o período de teste')
                     time.sleep(2)
-                    self.set_status_lan('APROVADO') # Mensagem padrão para o frontEnd atualizar Status
+                    self.set_status('APROVADO') # Mensagem padrão para o frontEnd atualizar Status
                     
                     self.__packet_sniffer_lan.stop()
                     self.__finish_wan = True

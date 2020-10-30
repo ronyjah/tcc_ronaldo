@@ -68,6 +68,7 @@ class ConfigSetup1_1:
         self.__set_ra2 = False
         self.__recvd_dhcp_renew = False
         self.__dhcp_renew_done = False
+        self.__pd_prefixlen = None
         self.__sendmsgssetup1_1 = SendMsgs(self.__config)
         self.__wan_device_tr1 = self.__config.get('wan','device_wan_tr1')
         self.__wan_mac_tr1 = self.__config.get('wan','wan_mac_tr1')
@@ -457,8 +458,10 @@ class ConfigSetup1_1:
                 self.set_ipv6_src(self.__config.get('wan','ra_address'))
                 self.set_ipv6_dst(self.__config.get('multicast','all_nodes_addr'))
                 if not self.__set_ra2:
+                    print('RA_NORMAL')
                     self.__sendmsgssetup1_1.send_tr1_RA(self)
                 else:
+                    print('RA_versao2L')
                     self.__sendmsgssetup1_1.send_tr1_RA2(self)
             else:
                 self.set_local_addr_ceRouter(pkt[IPv6].src)

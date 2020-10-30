@@ -27,7 +27,9 @@ class Test161:
         self.__result = None
         self.__taskDone = False
         self.__test_desc = self.__config.get('tests','1.6.1')
-
+        self.msg = self.__config.get('tests','1.6.1')
+        self.msg_lan = self.__config.get('tests','1.6.1')
+        self.addr_ceRouter = None      
 
     def set_result(self, valor):
         self.__result = valor
@@ -37,21 +39,54 @@ class Test161:
 
     def set_task_done(self):
         self.__taskDone = True
+    def get_addr_ceRouter(self):
+        return self.addr_ceRouter
+    
+    def get_mac_ceRouter(self):
+        return self.mac_ceRouter
+
+    def set_status_lan(self,v):
+        self.msg_lan = v
+
+    def get_status_lan(self):
+        return self.msg_lan
+
+
+    def set_status(self,v):
+        self.msg = v
+
+    def get_status(self):
+        return self.msg
+
 
     def run(self):
+        @self.__app.route("/LAN",methods=['GET'])
+        def envia_lan():
 
-        logging.info('Passo1-create Packet sniffer')
-        self.__packet_sniffer = PacketSniffer('test161',self.__queue,self,self.__config,self.__config.get('lan','lan_device'))
+            return self.get_status_lan()
 
-        logging.info('Passo3 - Start')
-        self.__packet_sniffer.start()
-        logging.info('Passo4-Started')
+        @self.__app.route("/WAN",methods=['GET'])
+        def enviawan():
+
+            return self.get_status()
+
+        self.__packet_sniffer_wan = PacketSniffer('test161',self.__queue,self,self.__config,self.__config.get('lan','lan_device'))
+        t_test1 = 0
+        t_test2 = 0
+
+        cache_wan = []
+
+        self.__packet_sniffer_wan.start()
+
         logging.info(self.__test_desc)
-        logging.info('self.__queue_size_inicio')
+
         logging.info(self.__queue.qsize())
+
         while self.__taskDone == False:
 
             pkt = self.__queue.get()
+            cache_wan.append(pkt)
+            wrpcap("wan-1.6.1.cap",cache_wan)
             self.__queue.task_done()
 
             if pkt.haslayer(ICMPv6ND_NS):
@@ -60,33 +95,27 @@ class Test161:
             elif pkt.haslayer(ICMPv6ND_RS) and self.__valid == False:
                 self.set_result(False)
 
-                logging.info('self.__queue_size_emptyfail')
-                logging.info(self.__queue.qsize())
                 if self.__queue.empty():
                     self.set_task_done()
             else:
-                logging.info('self.__queue_size_emptysucess')
-                logging.info(self.__queue.qsize())
+
                 if self.__queue.empty():
                     self.set_task_done()
 
 
         if self.get_result()== False:
 
-            logging.info('Passo3-t161run_sttop-theard fail')
-
-            self.__packet_sniffer.stop()
-
-            logging.info('self.__queue_size_fim')
-            logging.info(self.__queue.qsize())
-
+            self.__packet_sniffer_wan.stop() 
+            logging.info('Reprovado: Teste 1.6.1- ROTEADOR ENVIOU ICMP RS ANTES DO ENVIAR NS de seu endereço local')
+            self.set_status('Reprovado: Teste 1.6.1- ROTEADOR ENVIOU ICMP RS ANTES DO ENVIAR NS de seu endereço local')
+            time.sleep(2)
+            self.set_status('REPROVADO') # Mensagem padrão para o frontEnd atualizar Status
             return False
         else:
-            logging.info('Passo4-t161run_sttop-theard success')
-
-            self.__packet_sniffer.stop()
-
-            logging.info('self.__queue_size_fim')
-            logging.info(self.__queue.qsize())
-
+            self.__packet_sniffer_wan.stop() 
+            logging.info('APROVADO: Teste 1.6.1- ROTEADOR ENVIOU ICMP RS APOS TER ENVIADO NS de seu endereço local')
+            self.set_status('APROVADO: Teste 1.6.1- ROTEADOR ENVIOU ICMP RS APOS TER ENVIADO NS de seu endereço local')
+            time.sleep(2)
+            self.set_status('APROVADO') # Mensagem padrão para o frontEnd atualizar Status
             return True
+

@@ -232,6 +232,7 @@ class CeRouter(Profile):
             elif test == 'Test164a':
                 self.add_step(Test164a(self.__config,app))
                 self.active = True
+
                 return 'Test RFC 7084 Item: Test1.6.4.a'
 
             elif test == 'Test163a':
@@ -267,7 +268,7 @@ class CeRouter(Profile):
 
 
             elif test == 'Test161':
-                self.add_step(Test162a(self.__config,app))
+                self.add_step(Test161(self.__config,app))
                 self.active = True
                 return 'Test RFC 7084 Item: Test1.6.1'
         
