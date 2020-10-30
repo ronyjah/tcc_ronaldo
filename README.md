@@ -37,7 +37,7 @@ python3 __main__.py -c .
 ### Bugs List:
 - [ ] Finish test automatically
 - [ ] Support sequential test
-- [] Show captures files in Web interface
+- [ ] Show captures files in Web interface
 
 ### List tests:
 The basic requeriments to Routers IPv6 conformance and cover by RFC 7084 protocol  tester
