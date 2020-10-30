@@ -8,19 +8,10 @@ The Setup and steps for each test is described on Document: [Conformace Scenario
 ```bash
 git clone https://github.com/ronyjah/tcc_ronaldo
 cd tcc_ronaldo
+sudo apt update
+sudo python-3 pip
 source venv/bin/activate
 pip3 install -r requirements.txt
-```
-
-## Usage Release 1.0 (without frontEnd)
-1. Disable IPv6 support of SO. Change for sudo user, sysctl -w net.ipv6.conf.all.disable_ipv6=1
-2. Open the file **rfclan.conf** in section **LAN**, edit the parameter **lan_device** to device name connected on LAN of Router Under Test.
-3. In section **WAN**, change parameter **device_wan_tr1** to device name connected on WAN of Router Under Test.
-4. Open the file **cerouter.py**, in function **activate** uncomment the test wishes to run (**Select just one per test**).
-5. Run the script as super user:
-```bash
-source venv/bin/activate
-python3 __main__.py -c .
 ```
 
 ## Usage Release 2.0 (with FrontEnd)
