@@ -439,8 +439,6 @@ class ConfigSetup1_1_Lan:
                 self.__sendmsgssetup1_1.send_icmp_na_lan(self)
         
 
-        print('chegou RA PRA ESSE TESTE')
-        pkt.show()
         if pkt.haslayer(ICMPv6ND_RA):
             self.__routerlifetime_CeRouter = pkt[ICMPv6ND_RA].routerlifetime
             if pkt.haslayer(ICMPv6NDOptPrefixInfo):

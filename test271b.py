@@ -134,7 +134,7 @@ class Test271b:
                         self.__finish_wan = True 
                         self.__fail_test = True
                         self.__packet_sniffer_lan.stop()
-
+                        return False
                     if temporizador % 20 == 0:
 
 
@@ -153,9 +153,15 @@ class Test271b:
                 if not self.__config_setup_lan.get_disapproved():
                     self.__config_setup_lan.run_setup1_1(pkt)
                 else:
-                    logging.info('Reprovado Teste 2.7.1b - Falha em completar o Common Setup 1.1 da RFC')
-                    self.__packet_sniffer_lan.stop() 
-                    return False
+                    logging.info('LAN: Reprovado Teste 2.7.1b - Falha em completar o setup 1.1')
+                    self.set_status_lan('Reprovado Teste 2.7.1b - Falha em completar o setup 1.1')
+                    time.sleep(2)
+                    self.set_status_lan('REPROVADO') # Mensagem padrão para o frontEnd atualizar Status
+
+                    self.__packet_sniffer_lan.stop()
+                    self.__finish_wan = True 
+                    self.__fail_test = True
+                    return False     
             else:
                 logging.info('LAN:Setup LAN  Concluido')
                 self.set_status_lan('LAN:Setup LAN  Concluido')

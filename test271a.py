@@ -114,23 +114,53 @@ class Test271a:
         time_over = False
         cache_lan = []
         self.set_flags_lan()
+        temporizador = 0
+        test_max_time_lan = 300
         while not self.__queue_lan.full():
             while self.__queue_lan.empty():
-                if t_test < 60:
-                    time.sleep(1)
-                    t_test = t_test + 1
-                else:
-                    time_over = True
+                time.sleep(1)
+                if self.__config_setup1_1.get_setup1_1_OK():
+                    self.__config_setup_lan.set_setup_lan_start()
+                    if temporizador < test_max_time_lan:
+                        temporizador = temporizador + 1
+                    else:
+                        self.set_status_lan('LAN: Reprovado. Timeout')
+                        time.sleep(2)
+                        self.set_status_lan('REPROVADO')
+                        logging.info('LAN: Reprovado. Timeout')
+                        #logging.info(routerlifetime)
+                        self.__finish_wan = True 
+                        self.__fail_test = True
+                        self.__packet_sniffer_lan.stop()
+                        return False
+                    if temporizador % 20 == 0:
+
+
+                        logging.info('LAN: Tempo limite do teste: '+str(test_max_time_lan)+' segundos. Tempo: ' +str(temporizador))
+                        self.set_status_lan('LAN: Tempo limite do teste: '+str(test_max_time_lan)+' segundos. Tempo: ' +str(temporizador))
+                    if temporizador % 8 ==0:
+                        self.set_status_lan('LAN: Transmissão periódica de ICMP RS ')
+                        logging.info('LAN: Transmissão periódica de ICMP RS ')
+                        self.rs_lan()
+
             pkt = self.__queue_lan.get()
+
             cache_lan.append(pkt)
             wrpcap("lan-2.7.1a.cap",cache_lan)
+
             if not self.__config_setup_lan.get_setup_OK():
                 if not self.__config_setup_lan.get_disapproved():
                     self.__config_setup_lan.run_setup1_1(pkt)
                 else:
-                    logging.info('Reprovado Teste 2.7.1.a - Falha em completar o Common Setup 1.1 da RFC')
-                    self.__packet_sniffer_lan.stop() 
-                    return False       
+                    logging.info('LAN: Reprovado Teste 2.7.1a - Falha em completar o setup 1.1')
+                    self.set_status_lan('Reprovado Teste 2.7.1a - Falha em completar o setup 1.1')
+                    time.sleep(2)
+                    self.set_status_lan('REPROVADO') # Mensagem padrão para o frontEnd atualizar Status
+
+                    self.__packet_sniffer_lan.stop()
+                    self.__finish_wan = True 
+                    self.__fail_test = True
+                    return False     
             else:
                 logging.info('Setup LAN  Concluido')
                 #self.__packet_sniffer_wan.stop() 
@@ -138,41 +168,62 @@ class Test271a:
                 preferredlifetime = self.__config_setup_lan.get_preferredlifetime_CeRouter()
                 validlifetime = self.__config_setup_lan.get_validlifetime_CeRouter()
                 if prefrix_pd == int(self.__config.get('t2.7.1a','dhcp_plen')):
-                    logging.info('Aprovado Teste 2.7.1.a Prefixo IA_PD é tamanho 64')
-                    #self.__packet_sniffer_lan.stop()
-                    #return True
+                    logging.info('Aprovado parcial: Teste t2.7.1a router PD length é igual a 64')
+                    self.set_status_lan('Aprovado parcial: Teste t2.7.1a router PD length é igual a 64')
                 else:                     
-                    logging.info('Reprovado -Não é 64')
+                    logging.info('Valor esperado: 64')
+                    logging.info('Valor lido:')
                     logging.info(prefrix_pd)
+                    logging.info('LAN: REPROVADO Teste t2.7.1a router IA_PD length é igual a 64')
+                    self.set_status_lan('LAN: Reprovado Teste t2.7.1a router IA_PD length IA_PD length 64')
+                    time.sleep(2)
+                    self.set_status_lan('REPROVADO') # Mensagem padrão para o frontEnd atualizar Status
                     self.__packet_sniffer_lan.stop()
-                    return False
+                    self.__finish_wan = True 
+                    self.__fail_test = True
+                    return False   
 
                 if preferredlifetime <= int(self.__config.get('t2.7.1a','dhcp_preflft')):
-                    logging.info(' Teste 2.7.1a: preferredlifetime OK. preferredlifetime dentro do especificado no RA')
-                    #self.__packet_sniffer_lan.stop()
-                    #return True
+                    logging.info(' Teste t2.7.1a: preferredlifetime OK. preferredlifetime dentro do especificado no RA')
+                    self.set_status_lan('Aprovado parcial: Teste t2.7.1a:  preferredlifetime dentro do especificado no RA')
                 else:                     
-                    logging.info(' Teste 2.7.1a: Reprovado. preferredlifetime acima do especificado no RA')
+                    logging.info(' Teste t2.7.1a: Reprovado. preferredlifetime acima do especificado no RA')
+                    logging.info('Valor lido:')
                     logging.info(preferredlifetime)
+                    self.set_status_lan('LAN:  Teste t2.7.1a: Reprovado. preferredlifetime acima do especificado no RA')
+                    time.sleep(2)
+                    self.set_status_lan('REPROVADO') # Mensagem padrão para o frontEnd atualizar Status
                     self.__packet_sniffer_lan.stop()
-                    return False
+                    self.__finish_wan = True 
+                    self.__fail_test = True
+                    return False   
 
                 if validlifetime <= int(self.__config.get('t2.7.1a','dhcp_validlft')):
-                    logging.info('Teste 2.7.1a: preferredlifetime OK. validlifetime dentro do especificado no RA')
+                    logging.info('Teste t2.7.1a: validlifetime OK. validlifetime dentro do especificado no RA')
+                    self.set_status_lan('Aprovado parcial: Teste t2.7.1a:  validlifetime dentro do especificado no RA')
+
                     #self.__packet_sniffer_lan.stop()
                     #return True
-                else:                     
-                    logging.info('Reprovado Teste 2.7.1a. validlifetime acima do especificado no RA')
+                else:       
+            
+                    logging.info('LAN:  Teste t2.7.1a: Reprovado. validlifetime acima do especificado no RA:')
                     logging.info(validlifetime)
+                    self.set_status_lan('LAN:  Teste t2.7.1a: Reprovado. validlifetime acima do especificado no RA')
+                    time.sleep(2)
+                    self.set_status_lan('REPROVADO') # Mensagem padrão para o frontEnd atualizar Status
                     self.__packet_sniffer_lan.stop()
-                    return False
-                logging.info('Aprovado Teste 2.7.1a.')
-                self.__packet_sniffer_lan.stop()
-                return True
+                    self.__finish_wan = True 
+                    self.__fail_test = True
+                    return False  
                 
-
-
-  
+                logging.info('Aprovado Teste2.7.1a. Roteador anunciou com valores corretos os parâmetros de Validlifetime, preferedlifetime e PD prefix.')
+                self.set_status_lan('Aprovado Teste2.7.1a. Roteador anunciou com valores corretos os parâmetros de Validlifetime, preferedlifetime e PD prefix.')
+                time.sleep(2)
+                self.set_status_lan('APROVADO') # Mensagem padrão para o frontEnd atualizar Status
+                self.__packet_sniffer_lan.stop()
+                self.__finish_wan = True
+                self.__fail_test = False 
+                return True       
 
 
     def run(self):
@@ -208,7 +259,8 @@ class Test271a:
             cache_wan.append(pkt)
             wrpcap("WAN-2.7.6.cap",cache_wan)
             if not self.__config_setup1_1.get_setup1_1_OK():
-
+                logging.info('WAN: Setup 1.1 em execução')
+                self.set_status('WAN: Setup 1.1 em execução') 
                 if not self.__config_setup1_1.get_disapproved():
                     self.__config_setup1_1.run_setup1_1(pkt)
                 else:
