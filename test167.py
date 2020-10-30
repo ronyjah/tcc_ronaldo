@@ -37,7 +37,8 @@ class Test167:
         self.__link_local_addr = self.__config.get('wan','link_local_addr')
         self.__all_nodes_addr = self.__config.get('multicast','all_nodes_addr')
         self.__test_desc = self.__config.get('tests','1.6.7')
-
+        self.__finish_wan = False
+        self.__fail_test = False
 
     def set_flags(self):
         self.__config_setup1_1.set_flag_M(self.__config.get('t1.6.6b','flag_m'))
@@ -68,6 +69,8 @@ class Test167:
                 if t_test < 60:
                     time.sleep(1)
                     t_test = t_test + 1
+                    logging.info('LAN: Tempo total de buscar por mensagens de roteamento dinamico Tempo 60 seg. Tempo atual ' +str(t_test))
+                    self.set_status_lan('LAN: Tempo total de buscar por mensagens de roteamento dinamico Tempo 60 seg. Tempo atual ' +str(t_test)))
                 else:
                     time_over = True
             pkt = self.__queue_wan.get()
@@ -77,77 +80,109 @@ class Test167:
                 if not self.__config_setup1_1.get_disapproved():
                     self.__config_setup1_1.run_setup1_1(pkt)
                 else:
-                    logging.info('Reprovado Teste 1.6.7 - Falha em completar o Common Setup 1.1 da RFC')
-                    self.__packet_sniffer_wan.stop() 
-                    return False
-
+                    logging.info('WAN: Reprovado Teste 1.6.7 - Falha em completar o setup LAN')
+                    self.set_status('WAN: Reprovado Teste 1.6.7 - Falha em completar o setup LAN')
+                    time.sleep(2)
+                    self.set_status('REPROVADO') # Mensagem padrão para o frontEnd atualizar Status
+                    self.__packet_sniffer_wan.stop()
+                    return False  
             else: 
 
 
 
                 if pkt.haslayer(EIGRPv6ExtRoute):
                     logging.info(pkt.show())
-                    logging.info('Reprovado Teste 1.6.7- ')
+                    logging.info('Reprovado Teste 1.6.7-EIGRPv6ExtRoute ')
 
+                    self.set_status('WAN: Reprovado Teste 1.6.7-EIGRPv6ExtRoute')
+                    time.sleep(2)
+                    self.set_status('REPROVADO') # Mensagem padrão para o frontEnd atualizar Status
                     self.__packet_sniffer_wan.stop()
-                    return False
+                    return False  
 
                 if pkt.haslayer(EIGRPExtRoute):
                     logging.info(pkt.show())
-                    logging.info('Reprovado Teste 1.6.7- ')
+                    logging.info('Reprovado Teste 1.6.7-EIGRPExtRoute ')
 
+                    self.set_status('WAN: Reprovado Teste 1.6.7-EIGRPExtRoute')
+                    time.sleep(2)
+                    self.set_status('REPROVADO') # Mensagem padrão para o frontEnd atualizar Status
                     self.__packet_sniffer_wan.stop()
-                    return False
+                    return False  
 
                 if pkt.haslayer(EIGRPIntRoute):
                     logging.info(pkt.show())
-                    logging.info('Reprovado Teste 1.6.7- ')
 
+                    logging.info('WAN: Reprovado Teste 1.6.7-EIGRPIntRoute')
+                    self.set_status('WAN: Reprovado Teste 1.6.7-EIGRPIntRoute')
+                    time.sleep(2)
+                    self.set_status('REPROVADO') # Mensagem padrão para o frontEnd atualizar Status
                     self.__packet_sniffer_wan.stop()
-                    return False
+                    return False  
 
                 if pkt.haslayer(EIGRPv6ExtRoute):
                     logging.info(pkt.show())
-                    logging.info('Reprovado Teste 1.6.7- ')
-
+                    logging.info('WAN: Reprovado Teste 1.6.7-EIGRPv6ExtRoute')
+                    self.set_status('WAN: Reprovado Teste 1.6.7-EIGRPv6ExtRoute')
+                    time.sleep(2)
+                    self.set_status('REPROVADO') # Mensagem padrão para o frontEnd atualizar Status
                     self.__packet_sniffer_wan.stop()
-                    return False
+                    return False  
 
                 if pkt.haslayer(OSPF_Hdr):
                     logging.info(pkt.show())
-                    logging.info('Reprovado Teste 1.6.7- ')
-
+                    logging.info('WAN: Reprovado Teste 1.6.7-OSPF_Hdr')
+                    self.set_status('WAN: Reprovado Teste 1.6.7-OSPF_Hdr')
+                    time.sleep(2)
+                    self.set_status('REPROVADO') # Mensagem padrão para o frontEnd atualizar Status
                     self.__packet_sniffer_wan.stop()
-                    return False
+                    return False  
+
                 if pkt.haslayer(OSPF_Hello):
                     logging.info(pkt.show())
-                    logging.info('Reprovado Teste 1.6.7- ')
-
+                    logging.info('WAN: Reprovado Teste 1.6.7-OSPF_Hello')
+                    self.set_status('WAN: Reprovado Teste 1.6.7-OSPF_Hello')
+                    time.sleep(2)
+                    self.set_status('REPROVADO') # Mensagem padrão para o frontEnd atualizar Status
                     self.__packet_sniffer_wan.stop()
-                    return False
+                    return False  
                 if pkt.haslayer(OSPFv3_Hdr):
                     logging.info(pkt.show())
-                    logging.info('Reprovado Teste 1.6.7-')
-
+                    logging.info('WAN: Reprovado Teste 1.6.7-OSPFv3_Hdr')
+                    self.set_status('WAN: Reprovado Teste 1.6.7-OSPFv3_Hdr')
+                    time.sleep(2)
+                    self.set_status('REPROVADO') # Mensagem padrão para o frontEnd atualizar Status
                     self.__packet_sniffer_wan.stop()
-                    return False
+                    return False  
+
                 if pkt.haslayer(OSPFv3_Hello):
                     logging.info(pkt.show())
-                    logging.info('Reprovado Teste 1.6.7- ')
-
+                    logging.info('WAN: Reprovado Teste 1.6.7-OSPFv3_Hello')
+                    self.set_status('WAN: Reprovado Teste 1.6.7-OSPFv3_Hello')
+                    time.sleep(2)
+                    self.set_status('REPROVADO') # Mensagem padrão para o frontEnd atualizar Status
                     self.__packet_sniffer_wan.stop()
-                    return False
+                    return False  
                 if pkt.haslayer(OSPFv3_Router_LSA):
                     logging.info(pkt.show())
-                    logging.info('Reprovado Teste 1.6.7- ')
+                     logging.info('WAN: Reprovado Teste 1.6.7-OSPFv3_Router_LSA')
+                    self.set_status('WAN: Reprovado Teste 1.6.7-OSPFv3_Router_LSA')
+                    time.sleep(2)
+                    self.set_status('REPROVADO') # Mensagem padrão para o frontEnd atualizar Status
                     self.__packet_sniffer_wan.stop()
-                    return False
+                    return False  
 
                 elif time_over :
-
                     self.__packet_sniffer_wan.stop() 
-                    logging.info('Aprovado: Teste 1.6.7-Tempo finalizado e não recebeu DHCP Renew em DHCP Reconf adulterado')
-                    return True
+                    logging.info('Aprovado: Teste 1.6.7-Nao houveram mensagem de roteamento dinâmico durante o período de teste')
+                    self.set_status_lan('Aprovado: Teste 1.6.7-Nao houveram mensagem de roteamento dinâmico durante o período de teste')
+                    time.sleep(2)
+                    self.set_status_lan('APROVADO') # Mensagem padrão para o frontEnd atualizar Status
+                    
+                    self.__packet_sniffer_lan.stop()
+                    self.__finish_wan = True
+                    self.__fail_test = False 
+                    return True        
 
      
         self.__packet_sniffer_wan.stop()
