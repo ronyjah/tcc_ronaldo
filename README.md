@@ -14,7 +14,7 @@ source venv/bin/activate
 pip3 install -r requirements.txt
 ```
 
-## Usage Release 2.0 (with FrontEnd)
+## Usage Release 2.1 (with FrontEnd)
 1. Disable IPv6 support of SO. Change for sudo user, sysctl -w net.ipv6.conf.all.disable_ipv6=1
 2. Open the file **rfclan.conf** in section **LAN**, edit the parameter **lan_device** to device name connected on LAN of Router Under Test.
 3. In section **WAN**, change parameter **device_wan_tr1** to device name connected on WAN of Router Under Test.
@@ -26,8 +26,8 @@ python3 __main__.py -c .
 ```
 5. Open the file **index.html** with google-chrome or Firefox and click in Run to execute the test.
 6. Restart de router, make or remake the WAN with IPoE auto, DHCPv6 client enable and request prefix.
-6. The software does not support yet sequencial tests. To do a new test, restart the python script (Ctrl+C some time is enough to stop) and Run the new test in Web interface.
-6. After finish test, acess menu **Capture**(ToDo) to download captures files. The captures of test is saved on project folder.
+7. The software does not support yet sequencial tests. To do a new test, restart the python script (Ctrl+C some time is enough to stop) and Run the new test in Web interface.
+8. After finish test, acess menu **Capture**(ToDo) to download captures files. The captures of test is saved on project folder.
 
 ### Bugs List:
 - [ ] Finish test automatically
