@@ -52,7 +52,7 @@ class CeRouter(Profile):
         Profile.__init__(self,'CeRouter',config=config)
         self.__config = config
         self.__previous_mac = ''
-        
+        self.__app = app
         self.__device_lan_tn1 = None
         self.__lan_mac_tn1 = None
         self.__device_wan_tr1 = None
@@ -66,9 +66,13 @@ class CeRouter(Profile):
         self.__session = None
         self.iperf = None
         self.active = False
-
+        self.number_tests = 18
+        self.initapp()
         self.__t_flask =  Thread(target=self.start_flask,name='Flask server',daemon=False)
         self.__t_flask.start()
+
+    def unlock_test(self):
+        self.active = False
 
     def configure_interface(self, conf_name, ip):
         lan_device = self.__config.get('jiga', conf_name)
@@ -80,9 +84,10 @@ class CeRouter(Profile):
         print("WAIT_LAN_CONNECT LOADED")
         device = self.__config.get('jiga', 'lan_device')
 
-    def activate(self):
-        logging.info('CeRouter: profile activating')
-        @app.route("/active/<test>",methods=['GET'])
+    def get_number_tests(self):
+        return self.number_tests
+    def initapp(self):
+        @self.__app.route("/active/<test>",methods=['GET'])
         def enviar(test):
 
             if test == 'Test324':
@@ -271,18 +276,20 @@ class CeRouter(Profile):
                 self.add_step(Test161(self.__config,app))
                 self.active = True
                 return 'Test RFC 7084 Item: Test1.6.1'
-        
+    def activate(self):
+        logging.info('CeRouter: profile activating')               
         while not (self.active):
             time.sleep(5)
             logging.info('CeRouter: Aguardando a seleção do Teste pelo FrontEnd')
 
-                
+
+         
 
 
 
     def start_flask(self):
-        CORS(app)
-        app.config["SECRET_KEY"] = 'olamundo'
-        app.run(host='0.0.0.0')
+        CORS(self.__app)
+        self.__app.config["SECRET_KEY"] = 'olamundo'
+        self.__app.run(host='0.0.0.0')
 
 

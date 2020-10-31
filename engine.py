@@ -57,7 +57,7 @@ class Engine:
 
         logging.info('Application started with profile: ' + profile_name)
 
-        self.__active_profile.execute(profile_name)
+        self.__active_profile.execute(profile_name,self.__active_profile)
 
     def get_profile_names(self):
         profiles = []

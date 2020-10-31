@@ -133,7 +133,7 @@ class Test162b:
             pkt = self.__queue_wan.get()
 
             cache_wan.append(pkt)
-            wrpcap("wan-1.6.3b.cap",cache_wan)
+            wrpcap("wan-1.6.2b.cap",cache_wan)
 
             if not self.__config_setup1_1.get_setup1_1_OK():
                 logging.info('WAN: Setup 1.1 em execução')

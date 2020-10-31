@@ -143,7 +143,7 @@ class Test162a:
                     return False
             pkt = self.__queue_wan.get()
             cache_wan.append(pkt)
-            wrpcap("wan-1.6.3a.cap",cache_wan)
+            wrpcap("wan-1.6.2a.cap",cache_wan)
 
 
             if not self.__config_setup1_1.get_setup1_1_OK():

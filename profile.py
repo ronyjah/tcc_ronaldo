@@ -39,10 +39,10 @@ class Profile:
     def get_config(self):
         return self.profile_conf
 
-    def execute(self, profile_name):
+    def execute(self, profile_name,profile):
         logging.debug('Profile - executing profile ' + self.__name)
 
-
+        _profile = profile
         stepsNumber = len(self.__steps_list)
         stepsCounter = -1
 
@@ -58,9 +58,14 @@ class Profile:
             test_ok = step.run()
             if not test_ok:
                 logging.info('TESTE CONCLUIDO COM FALHA')
-                return False
+                _profile.unlock_test()
+                _profile.activate()
+                
 
             logging.info('TESTE CONCLUIDO COM SUCESSO')
+            _profile.unlock_test()
+            _profile.activate()
+            
 
     def configure_interfaces(self):
         device = self.__config.get('jiga', 'lan_device')
