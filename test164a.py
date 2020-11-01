@@ -100,6 +100,7 @@ class Test164a:
         send_ra2 = False
         send_ra_M_1 =False
         cache_wan = []
+        scenario_OK = False
         while not self.__queue_wan.full():
             while self.__queue_wan.empty():
                 if t_test < 120:
@@ -108,6 +109,28 @@ class Test164a:
                     if t_test % 20 == 0:
                         logging.info('WAN: Tempo limite de teste 120 seg. Tempo atual: ' +str(t_test))
                         self.set_status('WAN: Tempo limite de teste 120 seg. Tempo atual:  ' +str(t_test))
+
+
+                    if not self.__ND_local_OK:
+                        continue
+                    else:
+                        if t_test % 5 == 0:
+                            if not send_ns:
+
+                                logging.info('WAN: TR1 Enviando ICMP NS')
+                                self.set_status('WAN: TR1 Enviando ICMP NS')
+                                print(self.__config_setup1_1.get_mac_ceRouter())
+                                print(self.__config_setup1_1.get_local_addr_ceRouter())
+                                #self.__sendmsgs.set_flags_common_setup(self.__config_setup1_1)
+                                self.__config_setup1_1.set_ether_src(self.__config.get('wan','link_local_mac'))
+                                self.__config_setup1_1.set_ether_dst(self.__config_setup1_1.get_mac_ceRouter())
+                                self.__config_setup1_1.set_ipv6_src(self.__config.get('wan','link_local_addr'))
+                                self.__config_setup1_1.set_ipv6_dst(self.__config_setup1_1.get_local_addr_ceRouter())
+                                self.__config_setup1_1.set_tgt(self.__config.get('wan','link_local_addr'))
+                                
+                                self.__sendmsgs.send_icmp_ns(self.__config_setup1_1)
+                                print('Enviando NS_LOCAL')
+                                continue
 
                 else:
                     self.__packet_sniffer_wan.stop() 
@@ -122,8 +145,9 @@ class Test164a:
             #if not self.__ND_local_OK:
             cache_wan.append(pkt)
             wrpcap("wan-1.6.4.cap",cache_wan)
+            
             if pkt.haslayer(ICMPv6ND_NS):
-
+                print('NS')
                 if pkt[ICMPv6ND_NS].tgt == '::':
 
                     continue
@@ -157,70 +181,74 @@ class Test164a:
                 return False  
 
             else:
-                if not send_ns:
-                    logging.info('WAN: TR1 Enviando ICMP NS')
-                    self.set_status('WAN: TR1 Enviando ICMP NS')
-                    #self.__sendmsgs.set_flags_common_setup(self.__config_setup1_1)
-                    self.__config_setup1_1.set_ether_src(self.__config.get('wan','link_local_mac'))
-                    self.__config_setup1_1.set_ether_dst(self.__config.get('multicast','all_mac_nodes'))
-                    self.__config_setup1_1.set_ipv6_src(self.__config.get('wan','global_wan_addr'))
-                    self.__config_setup1_1.set_ipv6_dst(self.__config.get('multicast','all_nodes_addr'))
-                    self.__config_setup1_1.set_tgt(self.__config.get('wan','link_local_addr'))
-                    
-                    self.__sendmsgs.send_icmp_ns(self.__config_setup1_1)
-                    send_ns = True
-                    continue
-            if pkt.haslayer(DHCP6_Solicit) and send_ns and not send_ra_M_1 :       
-                if not send_ra_M_1:
-                    logging.info('WAN: TR1 Enviando ICMP RA com Flag M para um ')
-                    self.set_status('WAN: TR1 Enviando ICMP RA com Flag M para um') 
-                    self.__config_setup1_1.set_ether_src(self.__config.get('wan','ra_mac'))
-                    self.__config_setup1_1.set_ether_dst(self.__config.get('multicast','all_mac_nodes'))
-                    self.__config_setup1_1.set_ipv6_src(self.__config.get('wan','link_local_addr'))
-                    self.__config_setup1_1.set_ipv6_dst(self.__config.get('multicast','all_nodes_addr'))
-                    self.__sendmsgs.send_tr1_RA(self.__config_setup1_1)
-                    send_ra = True
-                    send_ra_M_1 = True
-                    continue
+
+                if not scenario_OK:
+                    if not pkt.haslayer(ICMPv6ND_NA):
+                        continue
+                    else:
+                        send_ns = True
+                        scenario_OK = True
+
+                if pkt.haslayer(DHCP6_Solicit) and send_ns and not send_ra_M_1 :       
+                    if not send_ra_M_1:
+                        logging.info('WAN: TR1 Enviando ICMP RA com Flag M para um ')
+                        self.set_status('WAN: TR1 Enviando ICMP RA com Flag M para um') 
+                        self.__config_setup1_1.set_ether_src(self.__config.get('wan','ra_mac'))
+                        self.__config_setup1_1.set_ether_dst(self.__config.get('multicast','all_mac_nodes'))
+                        self.__config_setup1_1.set_ipv6_src(self.__config.get('wan','link_local_addr'))
+                        self.__config_setup1_1.set_ipv6_dst(self.__config.get('multicast','all_nodes_addr'))
+                        self.__sendmsgs.send_tr1_RA(self.__config_setup1_1)
+                        send_ra = True
+                        send_ra_M_1 = True
+                        while not self.__queue_wan.empty():
+                            self.__queue_wan.get()
+                            print('limpando raM1')
+
+                        continue
 
                     #self.set_ether_dst(pkt[Ether].src)
 
-            if send_ra_M_1 and not send_ra2:
-                if pkt.haslayer(DHCP6_Solicit):
-                    
-                        logging.info('WAN: TR1 Enviando ICMP RA com Flag M para zero ')
-                        self.set_status('WAN: TR1 Enviando ICMP RA com Flag M para zero') 
+                if send_ra_M_1 and not send_ra2:
+                    if pkt.haslayer(DHCP6_Solicit):
+                        
+                            logging.info('WAN: TR1 Enviando ICMP RA com Flag M para zero ')
+                            self.set_status('WAN: TR1 Enviando ICMP RA com Flag M para zero') 
 
 
-                        self.__config_setup1_1.set_flag_M("0")
-                        self.__config_setup1_1.set_ether_src(self.__config.get('wan','ra_mac'))
-                        self.__config_setup1_1.set_ether_dst(self.__config_setup1_1.get_mac_ceRouter())
-                        self.__config_setup1_1.set_ipv6_src(self.__config.get('wan','link_local_addr'))
-                        self.__config_setup1_1.set_ipv6_dst(self.__config_setup1_1.get_local_addr_ceRouter())
-                        self.__sendmsgs.send_tr1_RA(self.__config_setup1_1)
-                        send_ra2 = True
-                        continue
-            if send_ra2:
-                if pkt.haslayer(DHCP6_Solicit):
-                        logging.info('WAN: Recebido DHCP Solicit. Verificando se contem ICMP IA_PD')
-                        self.set_status('WAN: Recebido DHCP Solicit. Verificando se contem ICMP IA_PD')
-                        if pkt.haslayer(DHCP6OptIA_PD):
+                            self.__config_setup1_1.set_flag_M("0")
+                            self.__config_setup1_1.set_ether_src(self.__config.get('wan','ra_mac'))
+                            self.__config_setup1_1.set_ether_dst(self.__config_setup1_1.get_mac_ceRouter())
+                            self.__config_setup1_1.set_ipv6_src(self.__config.get('wan','link_local_addr'))
+                            self.__config_setup1_1.set_ipv6_dst(self.__config_setup1_1.get_local_addr_ceRouter())
+                            self.__sendmsgs.send_tr1_RA(self.__config_setup1_1)
+                            time.sleep(1)
+                            while not self.__queue_wan.empty():
+                                self.__queue_wan.get()
+                                print('limpando')
+                            send_ra2 = True
+                            continue
+                if send_ra2:
+                    if pkt.haslayer(DHCP6_Solicit):
+                            logging.info('WAN: Recebido DHCP Solicit. Verificando se contem ICMP IA_NA')
+                            self.set_status('WAN: Recebido DHCP Solicit. Verificando se contem ICMP IA_NA')
+                            if pkt.haslayer(DHCP6OptIA_NA):
 
-                            logging.info('WAN: APROVADO Teste 1.6.4a - Roteador Enviou solicit com Option IA_PD')
-                            self.set_status('WAN: APROVADO Teste 1.6.4a - Roteador Enviou solicit com Option IA_PD')
-                            time.sleep(2)
-                            self.set_status('APROVADO') # Mensagem padrão para o frontEnd atualizar Status
-                            self.__packet_sniffer_wan.stop()
-                            return True
-                        else:
+                                logging.info('WAN: APROVADO Teste 1.6.4 - Roteador Enviou solicit com Option IA_NA')
+                                self.set_status('WAN: APROVADO Teste 1.6.4 - Roteador Enviou solicit com Option IA_NA')
+                                time.sleep(2)
+                                self.set_status('APROVADO') # Mensagem padrão para o frontEnd atualizar Status
+                                self.__packet_sniffer_wan.stop()
 
-                            logging.info('WAN: Reprovado Teste 1.6.4a - Roteador Enviou solicit sem Option IA_NA')
-                            self.set_status('WAN: Reprovado Teste 1.6.4a - Falha em completar o setup LAN')
-                            time.sleep(2)
-                            self.set_status('REPROVADO') # Mensagem padrão para o frontEnd atualizar Status
-                            self.__packet_sniffer_wan.stop()
-                            return False  
-   
+                                return True
+                            else:
+
+                                logging.info('WAN: Reprovado Teste 1.6.4 - Roteador Enviou solicit sem Option IA_NA')
+                                self.set_status('WAN: Reprovado Teste 1.6.4 - Falha em completar o setup LAN')
+                                time.sleep(2)
+                                self.set_status('REPROVADO') # Mensagem padrão para o frontEnd atualizar Status
+                                self.__packet_sniffer_wan.stop()
+                                return False  
+    
         self.__packet_sniffer_wan.stop()
         return False
      

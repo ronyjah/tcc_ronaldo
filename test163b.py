@@ -91,7 +91,7 @@ class Test163b:
             return self.get_status()
 
         self.__packet_sniffer_wan = PacketSniffer('test163b',self.__queue_wan,self,self.__config,self.__wan_device_tr1)
-        self.__config_setup1_1.flags_partA()
+
         self.__packet_sniffer_wan.start()
         self.set_flags()
         logging.info(self.__test_desc)

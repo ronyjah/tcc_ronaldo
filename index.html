@@ -468,10 +468,10 @@ var test_id = 'None';
 var msg_lan = 'None';
 var msg_wan = 'None';
 $("button").click(function() {
-  if(test_id == 'None'){
+  // if(test_id == 'None'){
       test_id = this.id;
       // alert(test_id);
-    }
+    // }
   interval = setInterval(function(){
     loadDoc();
 
@@ -484,10 +484,12 @@ $("button").click(function() {
     xhttp.onreadystatechange = function() {
       if (this.status == 200) {
         if (this.responseText == 'APROVADO'){
+          // alert(test_id);
           document.getElementById(test_id).innerText = "Success";
           document.getElementById(test_id).className = "badge badge-success";
         }
         else if (this.responseText == 'REPROVADO'){
+        // alert(test_id);
           document.getElementById(test_id).innerText = "Fail";
           document.getElementById(test_id).className = "badge badge-danger";
         }

@@ -70,7 +70,7 @@ class Test161:
 
             return self.get_status()
 
-        self.__packet_sniffer_wan = PacketSniffer('test161',self.__queue,self,self.__config,self.__config.get('lan','lan_device'))
+        self.__packet_sniffer_wan = PacketSniffer('test161',self.__queue,self,self.__config,self.__config.get('wan','device_wan_tr1'))
         t_test1 = 0
         t_test2 = 0
 
@@ -87,20 +87,19 @@ class Test161:
             pkt = self.__queue.get()
             cache_wan.append(pkt)
             wrpcap("wan-1.6.1.cap",cache_wan)
-            self.__queue.task_done()
+            
 
             if pkt.haslayer(ICMPv6ND_NS):
                 if self.get_result() != False:
                     self.__valid = True
             elif pkt.haslayer(ICMPv6ND_RS) and self.__valid == False:
                 self.set_result(False)
+                self.set_task_done()
+            if pkt.haslayer(ICMPv6ND_RS) and self.__valid == True:
+                self.set_result(True)
+                self.set_task_done()
 
-                if self.__queue.empty():
-                    self.set_task_done()
-            else:
-
-                if self.__queue.empty():
-                    self.set_task_done()
+ 
 
 
         if self.get_result()== False:
