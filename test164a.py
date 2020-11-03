@@ -126,7 +126,7 @@ class Test164a:
                                 self.__config_setup1_1.set_ether_dst(self.__config_setup1_1.get_mac_ceRouter())
                                 self.__config_setup1_1.set_ipv6_src(self.__config.get('wan','link_local_addr'))
                                 self.__config_setup1_1.set_ipv6_dst(self.__config_setup1_1.get_local_addr_ceRouter())
-                                self.__config_setup1_1.set_tgt(self.__config.get('wan','link_local_addr'))
+                                self.__config_setup1_1.set_tgt(self.__config.get('wan','link_local_mac'))
                                 
                                 self.__sendmsgs.send_icmp_ns(self.__config_setup1_1)
                                 print('Enviando NS_LOCAL')

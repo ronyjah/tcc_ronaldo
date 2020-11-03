@@ -39,11 +39,12 @@ class SendMsgs:
         self.__flag_chlim = 64
         self.__flag_L = 1
         self.__flag_A = 0
-        self.__my_key = b'TAHITEST89ABCDEF'
-        self.__my_key_fake = b'TAHITEST89AAADEF'
-        self.__my_key_msg = b'\x01\x54\x41\x48\x49\x54\x45\x53\x54\x38\x39\x41\x42\x43\x44\x45\x46'
+        self.__my_key = b'IFSCSJLAB0123456'
+        self.__my_key_fake = b'IFSCSJLAB0AAADEF' # deve ser convertido em bytes na variável my_key_msg
+        self.__my_key_msg = b'\x01\x49\x46\x53\x43\x53\x4A\x4C\x41\x42\x30\x31\x32\x33\x34\x35\x36'
+                                    
         self.__rep = None    
-        self.__rep_base = '1122334455667788'
+        self.__rep_base = '1012131415161718'
         self.__lan_device = self.__config.get('lan','lan_device')
         self.__wan_device_tr1 = self.__config.get('wan','device_wan_tr1')
         self.__wan_mac_tr1 = self.__config.get('wan','wan_mac_tr1')
